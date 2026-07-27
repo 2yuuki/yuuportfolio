@@ -95,6 +95,30 @@ const UPSTREAM_BASE =
 const MEDIA_TYPES = {{
 {media_types}
 }};
+const TOTAL_LENGTHS = new Map();
+
+async function getTotalLength(upstreamUrl) {{
+  if (TOTAL_LENGTHS.has(upstreamUrl)) return TOTAL_LENGTHS.get(upstreamUrl);
+
+  const response = await fetch(upstreamUrl, {{
+    method: "HEAD",
+    mode: "cors",
+  }});
+  const totalLength = Number(response.headers.get("content-length")) || 0;
+  if (totalLength) TOTAL_LENGTHS.set(upstreamUrl, totalLength);
+  return totalLength;
+}}
+
+function getRangeStart(range, totalLength) {{
+  const match = range && range.match(/^bytes=(\\d*)-(\\d*)$/);
+  if (!match) return null;
+
+  if (match[1]) return Number(match[1]);
+  if (match[2] && totalLength) {{
+    return Math.max(totalLength - Number(match[2]), 0);
+  }}
+  return null;
+}}
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => {{
@@ -117,6 +141,8 @@ self.addEventListener("fetch", (event) => {{
       headers: requestHeaders,
       mode: "cors",
     }});
+    const responseLength =
+      Number(upstream.headers.get("content-length")) || 0;
 
     const extensionMatch = decodeURIComponent(requestUrl.pathname)
       .toLowerCase()
@@ -132,12 +158,24 @@ self.addEventListener("fetch", (event) => {{
     for (const header of [
       "accept-ranges",
       "content-length",
-      "content-range",
       "etag",
       "last-modified",
     ]) {{
       const value = upstream.headers.get(header);
       if (value) responseHeaders.set(header, value);
+    }}
+
+    if (range && upstream.status === 206 && responseLength) {{
+      const totalLength = await getTotalLength(upstreamUrl);
+      const rangeStart = getRangeStart(range, totalLength);
+      if (rangeStart !== null && totalLength) {{
+        const rangeEnd = rangeStart + responseLength - 1;
+        responseHeaders.set(
+          "content-range",
+          `bytes ${{rangeStart}}-${{rangeEnd}}/${{totalLength}}`
+        );
+        responseHeaders.set("accept-ranges", "bytes");
+      }}
     }}
     responseHeaders.set("cache-control", "public, max-age=31536000, immutable");
 
