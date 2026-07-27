@@ -1,5 +1,6 @@
 from pathlib import Path
 from urllib.parse import quote, unquote
+import hashlib
 import re
 import shutil
 
@@ -235,6 +236,7 @@ def gallery_autoplay_source() -> str:
 
   const activateMedia = (slide, active) => {
     slide.style.display = active ? "block" : "none";
+    slide.setAttribute("aria-hidden", active ? "false" : "true");
     slide.querySelectorAll("video").forEach((video) => {
       if (active) {
         video.play().catch(() => {});
@@ -251,29 +253,37 @@ def gallery_autoplay_source() -> str:
     if (slides.length < 2) return;
 
     let index = 0;
-    slides.forEach((slide, slideIndex) => {
-      activateMedia(slide, slideIndex === index);
-    });
-
-    window.setInterval(() => {
-      index = (index + 1) % slides.length;
+    const showSlide = (nextIndex) => {
+      index = (nextIndex + slides.length) % slides.length;
+      gallery.dataset.autoplayIndex = String(index);
       slides.forEach((slide, slideIndex) => {
         activateMedia(slide, slideIndex === index);
       });
-    }, AUTOPLAY_DELAY);
+    };
+
+    showSlide(0);
+    window.setInterval(() => showSlide(index + 1), AUTOPLAY_DELAY);
   });
 
   const startScrollingGallery = (viewport, slides) => {
     if (!viewport || slides.length < 2) return;
 
     let index = 0;
-    window.setInterval(() => {
-      index = (index + 1) % slides.length;
-      viewport.scrollTo({
-        left: index * viewport.clientWidth,
-        behavior: "smooth",
-      });
-    }, AUTOPLAY_DELAY);
+    viewport.style.scrollBehavior = "auto";
+
+    const showSlide = (nextIndex) => {
+      index = (nextIndex + slides.length) % slides.length;
+      viewport.dataset.autoplayIndex = String(index);
+      viewport.scrollLeft = Math.round(index * viewport.clientWidth);
+    };
+
+    viewport.addEventListener("scrollend", () => {
+      if (!viewport.clientWidth) return;
+      index = Math.round(viewport.scrollLeft / viewport.clientWidth);
+    });
+
+    showSlide(0);
+    window.setInterval(() => showSlide(index + 1), AUTOPLAY_DELAY);
   };
 
   document.querySelectorAll("[data-memory-slider]").forEach((gallery) => {
@@ -311,17 +321,18 @@ def gallery_autoplay_source() -> str:
     if (slides.length < 2) return;
 
     let index = 0;
-    slides.forEach((slide, slideIndex) => {
-      slide.style.animation = "none";
-      slide.style.opacity = slideIndex === index ? "1" : "0";
-    });
-
-    window.setInterval(() => {
-      index = (index + 1) % slides.length;
+    const showSlide = (nextIndex) => {
+      index = (nextIndex + slides.length) % slides.length;
+      rotator.dataset.autoplayIndex = String(index);
       slides.forEach((slide, slideIndex) => {
+        slide.style.animation = "none";
+        slide.style.display = "block";
         slide.style.opacity = slideIndex === index ? "1" : "0";
       });
-    }, AUTOPLAY_DELAY);
+    };
+
+    showSlide(0);
+    window.setInterval(() => showSlide(index + 1), AUTOPLAY_DELAY);
   });
 })();
 """
@@ -331,6 +342,11 @@ def build() -> None:
     if OUTPUT.exists():
         shutil.rmtree(OUTPUT)
     OUTPUT.mkdir(parents=True)
+
+    gallery_autoplay = gallery_autoplay_source()
+    gallery_autoplay_version = hashlib.sha256(
+        gallery_autoplay.encode("utf-8")
+    ).hexdigest()[:12]
 
     for source in ROOT.rglob("*"):
         if not source.is_file() or is_excluded(source):
@@ -358,7 +374,10 @@ def build() -> None:
                 f'<script src="{SITE_BASE}media-loader.js" defer></script>'
             )
             gallery_autoplay_tag = (
-                f'<script src="{SITE_BASE}gallery-autoplay.js" defer></script>'
+                (
+                    f'<script src="{SITE_BASE}gallery-autoplay.js'
+                    f'?v={gallery_autoplay_version}" defer></script>'
+                )
             )
             favicon_tag = (
                 f'<link rel="icon" type="image/png" href="{SITE_BASE}favicon.png">'
@@ -398,7 +417,7 @@ def build() -> None:
         encoding="utf-8",
     )
     (OUTPUT / "gallery-autoplay.js").write_text(
-        gallery_autoplay_source(),
+        gallery_autoplay,
         encoding="utf-8",
     )
 
