@@ -1790,6 +1790,24 @@ video.local-project-media {
   background: #000;
 }
 
+.memory-output-slider--full-width-images .memory-output-slider__frame,
+.memory-output-slider--full-width-images .memory-output-slider__slide {
+  min-height: 0;
+  height: auto;
+  background: transparent;
+}
+
+.memory-output-slider--full-width-images .memory-output-slider__track {
+  align-items: flex-start;
+}
+
+.memory-output-slider--full-width-images .memory-output-slider__slide img {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+}
+
 .memory-output-slider__slide figcaption {
   position: absolute;
   right: 1rem;
