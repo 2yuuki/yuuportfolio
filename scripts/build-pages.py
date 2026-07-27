@@ -228,6 +228,104 @@ def media_loader_source() -> str:
 """
 
 
+def gallery_autoplay_source() -> str:
+    return """(() => {
+  const AUTOPLAY_DELAY = 300;
+
+  const activateMedia = (slide, active) => {
+    slide.style.display = active ? "block" : "none";
+    slide.querySelectorAll("video").forEach((video) => {
+      if (active) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    });
+  };
+
+  document.querySelectorAll("gallery-slideshow").forEach((gallery) => {
+    const slides = Array.from(gallery.children).filter(
+      (child) => child.tagName === "MEDIA-ITEM"
+    );
+    if (slides.length < 2) return;
+
+    let index = 0;
+    slides.forEach((slide, slideIndex) => {
+      activateMedia(slide, slideIndex === index);
+    });
+
+    window.setInterval(() => {
+      index = (index + 1) % slides.length;
+      slides.forEach((slide, slideIndex) => {
+        activateMedia(slide, slideIndex === index);
+      });
+    }, AUTOPLAY_DELAY);
+  });
+
+  const startScrollingGallery = (viewport, slides) => {
+    if (!viewport || slides.length < 2) return;
+
+    let index = 0;
+    window.setInterval(() => {
+      index = (index + 1) % slides.length;
+      viewport.scrollTo({
+        left: index * viewport.clientWidth,
+        behavior: "smooth",
+      });
+    }, AUTOPLAY_DELAY);
+  };
+
+  document.querySelectorAll("[data-memory-slider]").forEach((gallery) => {
+    const viewport = gallery.querySelector("[data-slider-track]");
+    const slides = Array.from(
+      gallery.querySelectorAll(".memory-output-slider__slide")
+    );
+    startScrollingGallery(viewport, slides);
+  });
+
+  document
+    .querySelectorAll("[data-project-horizontal-gallery]")
+    .forEach((gallery) => {
+      const viewport = gallery.querySelector(
+        ".project-horizontal-gallery__viewport"
+      );
+      const slides = Array.from(
+        gallery.querySelectorAll(".project-horizontal-gallery__slide")
+      );
+      startScrollingGallery(viewport, slides);
+    });
+
+  document.querySelectorAll("[data-horizontal-gallery]").forEach((gallery) => {
+    const viewport = gallery.querySelector(
+      ".homepage-horizontal-gallery__viewport"
+    );
+    const slides = Array.from(
+      gallery.querySelectorAll(".homepage-horizontal-gallery__slide")
+    );
+    startScrollingGallery(viewport, slides);
+  });
+
+  document.querySelectorAll(".project-card__rotator").forEach((rotator) => {
+    const slides = Array.from(rotator.querySelectorAll("img"));
+    if (slides.length < 2) return;
+
+    let index = 0;
+    slides.forEach((slide, slideIndex) => {
+      slide.style.animation = "none";
+      slide.style.opacity = slideIndex === index ? "1" : "0";
+    });
+
+    window.setInterval(() => {
+      index = (index + 1) % slides.length;
+      slides.forEach((slide, slideIndex) => {
+        slide.style.opacity = slideIndex === index ? "1" : "0";
+      });
+    }, AUTOPLAY_DELAY);
+  });
+})();
+"""
+
+
 def build() -> None:
     if OUTPUT.exists():
         shutil.rmtree(OUTPUT)
@@ -258,10 +356,17 @@ def build() -> None:
             loader_tag = (
                 f'<script src="{SITE_BASE}media-loader.js" defer></script>'
             )
+            gallery_autoplay_tag = (
+                f'<script src="{SITE_BASE}gallery-autoplay.js" defer></script>'
+            )
             if "</head>" in text:
-                text = text.replace("</head>", f"{loader_tag}\n</head>", 1)
+                text = text.replace(
+                    "</head>",
+                    f"{loader_tag}\n{gallery_autoplay_tag}\n</head>",
+                    1,
+                )
             else:
-                text = loader_tag + "\n" + text
+                text = loader_tag + "\n" + gallery_autoplay_tag + "\n" + text
             destination.write_text(text, encoding="utf-8")
         else:
             shutil.copy2(source, destination)
@@ -273,6 +378,10 @@ def build() -> None:
     )
     (OUTPUT / "media-loader.js").write_text(
         media_loader_source(),
+        encoding="utf-8",
+    )
+    (OUTPUT / "gallery-autoplay.js").write_text(
+        gallery_autoplay_source(),
         encoding="utf-8",
     )
 
