@@ -5,6 +5,7 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "_site"
+FAVICON = ROOT / "favicon.png"
 SITE_BASE = "/yuuportfolio/"
 MEDIA_ROUTE = SITE_BASE + "__media__/"
 MEDIA_EXTENSIONS = {
@@ -359,17 +360,33 @@ def build() -> None:
             gallery_autoplay_tag = (
                 f'<script src="{SITE_BASE}gallery-autoplay.js" defer></script>'
             )
+            favicon_tag = (
+                f'<link rel="icon" type="image/png" href="{SITE_BASE}favicon.png">'
+            )
             if "</head>" in text:
                 text = text.replace(
                     "</head>",
-                    f"{loader_tag}\n{gallery_autoplay_tag}\n</head>",
+                    (
+                        f"{favicon_tag}\n"
+                        f"{loader_tag}\n"
+                        f"{gallery_autoplay_tag}\n"
+                        "</head>"
+                    ),
                     1,
                 )
             else:
-                text = loader_tag + "\n" + gallery_autoplay_tag + "\n" + text
+                text = (
+                    favicon_tag + "\n" +
+                    loader_tag + "\n" +
+                    gallery_autoplay_tag + "\n" +
+                    text
+                )
             destination.write_text(text, encoding="utf-8")
         else:
             shutil.copy2(source, destination)
+
+    if FAVICON.exists():
+        shutil.copy2(FAVICON, OUTPUT / "favicon.png")
 
     (OUTPUT / ".nojekyll").touch()
     (OUTPUT / "media-sw.js").write_text(
