@@ -5,15 +5,31 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "_site"
-MEDIA_BASE = "https://media.githubusercontent.com/media/2yuuki/yuuportfolio/main/"
+SITE_BASE = "/yuuportfolio/"
+MEDIA_ROUTE = SITE_BASE + "__media__/"
 MEDIA_EXTENSIONS = {
     ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".mov", ".pdf", ".docx"
 }
 EXCLUDED_PARTS = {".git", ".github", ".openai", "_site", "scripts"}
 REFERENCE_PATTERN = re.compile(
-    r"(?P<prefix>\b(?:src|href|poster)=[\"'])(?P<value>[^\"']+)(?P<suffix>[\"'])",
+    r"(?P<attr>\b(?:src|href|poster))=(?P<quote>[\"'])(?P<value>[^\"']+)(?P=quote)",
     re.IGNORECASE,
 )
+TRANSPARENT_IMAGE = (
+    "data:image/gif;base64,"
+    "R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+)
+
+MEDIA_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".mp4": "video/mp4",
+    ".mov": "video/quicktime",
+    ".pdf": "application/pdf",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
 
 
 def is_excluded(path: Path) -> bool:
@@ -35,7 +51,143 @@ def rewrite_reference(html_file: Path, value: str) -> str:
     if resolved.suffix.lower() not in MEDIA_EXTENSIONS:
         return value
 
-    return MEDIA_BASE + quote(relative.as_posix(), safe="/()")
+    return MEDIA_ROUTE + quote(relative.as_posix(), safe="/()")
+
+
+def rewrite_match(html_file: Path, match: re.Match) -> str:
+    attr = match.group("attr").lower()
+    quote_char = match.group("quote")
+    original = match.group("value")
+    rewritten = rewrite_reference(html_file, original)
+
+    if rewritten == original:
+        return match.group(0)
+
+    if attr == "src":
+        resolved = (html_file.parent / unquote(
+            original.split("#", 1)[0].split("?", 1)[0]
+        )).resolve()
+        placeholder = TRANSPARENT_IMAGE if resolved.suffix.lower() in {
+            ".png", ".jpg", ".jpeg", ".gif"
+        } else ""
+        return (
+            f'src={quote_char}{placeholder}{quote_char} '
+            f'data-media-src={quote_char}{rewritten}{quote_char}'
+        )
+
+    if attr == "poster":
+        return (
+            f'poster={quote_char}{TRANSPARENT_IMAGE}{quote_char} '
+            f'data-media-poster={quote_char}{rewritten}{quote_char}'
+        )
+
+    return f'href={quote_char}{rewritten}{quote_char}'
+
+
+def service_worker_source() -> str:
+    media_types = ",\n".join(
+        f'  "{extension}": "{mime_type}"'
+        for extension, mime_type in MEDIA_TYPES.items()
+    )
+    return f"""const MEDIA_PREFIX = "{MEDIA_ROUTE}";
+const UPSTREAM_BASE =
+  "https://media.githubusercontent.com/media/2yuuki/yuuportfolio/main/";
+const MEDIA_TYPES = {{
+{media_types}
+}};
+
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => {{
+  event.waitUntil(self.clients.claim());
+}});
+
+self.addEventListener("fetch", (event) => {{
+  const requestUrl = new URL(event.request.url);
+  if (!requestUrl.pathname.startsWith(MEDIA_PREFIX)) return;
+
+  event.respondWith((async () => {{
+    const encodedPath = requestUrl.pathname.slice(MEDIA_PREFIX.length);
+    const upstreamUrl = UPSTREAM_BASE + encodedPath + requestUrl.search;
+    const requestHeaders = new Headers();
+    const range = event.request.headers.get("range");
+    if (range) requestHeaders.set("range", range);
+
+    const upstream = await fetch(upstreamUrl, {{
+      method: "GET",
+      headers: requestHeaders,
+      mode: "cors",
+    }});
+
+    const extensionMatch = decodeURIComponent(requestUrl.pathname)
+      .toLowerCase()
+      .match(/\\.[a-z0-9]+$/);
+    const extension = extensionMatch ? extensionMatch[0] : "";
+    const responseHeaders = new Headers();
+
+    responseHeaders.set(
+      "content-type",
+      MEDIA_TYPES[extension] || upstream.headers.get("content-type") ||
+        "application/octet-stream"
+    );
+    for (const header of [
+      "accept-ranges",
+      "content-length",
+      "content-range",
+      "etag",
+      "last-modified",
+    ]) {{
+      const value = upstream.headers.get(header);
+      if (value) responseHeaders.set(header, value);
+    }}
+    responseHeaders.set("cache-control", "public, max-age=31536000, immutable");
+
+    return new Response(upstream.body, {{
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers: responseHeaders,
+    }});
+  }})());
+}});
+"""
+
+
+def media_loader_source() -> str:
+    return f"""(() => {{
+  const loadMedia = () => {{
+    document.querySelectorAll("[data-media-src]").forEach((element) => {{
+      element.src = element.dataset.mediaSrc;
+      element.removeAttribute("data-media-src");
+      if (element.tagName === "VIDEO") element.load();
+    }});
+    document.querySelectorAll("[data-media-poster]").forEach((element) => {{
+      element.poster = element.dataset.mediaPoster;
+      element.removeAttribute("data-media-poster");
+    }});
+  }};
+
+  if (!("serviceWorker" in navigator)) {{
+    loadMedia();
+    return;
+  }}
+
+  navigator.serviceWorker
+    .register("{SITE_BASE}media-sw.js", {{ scope: "{SITE_BASE}" }})
+    .then(() => navigator.serviceWorker.ready)
+    .then(() => {{
+      if (navigator.serviceWorker.controller) {{
+        loadMedia();
+        return;
+      }}
+
+      navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        loadMedia,
+        {{ once: true }}
+      );
+    }})
+    .catch(loadMedia);
+}})();
+"""
 
 
 def build() -> None:
@@ -57,19 +209,30 @@ def build() -> None:
 
         if source.suffix.lower() == ".html":
             text = source.read_text(encoding="utf-8")
-
-            def replace(match: re.Match) -> str:
-                value = rewrite_reference(source, match.group("value"))
-                return match.group("prefix") + value + match.group("suffix")
-
-            destination.write_text(
-                REFERENCE_PATTERN.sub(replace, text),
-                encoding="utf-8",
+            text = REFERENCE_PATTERN.sub(
+                lambda match: rewrite_match(source, match),
+                text,
             )
+            loader_tag = (
+                f'<script src="{SITE_BASE}media-loader.js" defer></script>'
+            )
+            if "</head>" in text:
+                text = text.replace("</head>", f"{loader_tag}\n</head>", 1)
+            else:
+                text = loader_tag + "\n" + text
+            destination.write_text(text, encoding="utf-8")
         else:
             shutil.copy2(source, destination)
 
     (OUTPUT / ".nojekyll").touch()
+    (OUTPUT / "media-sw.js").write_text(
+        service_worker_source(),
+        encoding="utf-8",
+    )
+    (OUTPUT / "media-loader.js").write_text(
+        media_loader_source(),
+        encoding="utf-8",
+    )
 
 
 if __name__ == "__main__":
