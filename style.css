@@ -3024,3 +3024,205 @@ body {
     max-width: 100% !important;
   }
 }
+
+/* =========================================================
+   MOBILE CARGO LAYOUT — final cascade
+   Mirrors the supplied mobile header, info overlay and footer.
+   Keep this block last so older desktop fallbacks cannot win.
+   ========================================================= */
+@media screen and (max-width: 768px) {
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  .portfolio-sidebar {
+    display: none !important;
+  }
+
+  .mobile-header {
+    position: relative;
+    z-index: 30;
+    display: block !important;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1.25rem;
+    background: #fff;
+  }
+
+  .mobile-header column-set {
+    display: grid !important;
+    grid-template-columns: minmax(0, 9fr) minmax(0, 3fr) !important;
+    gap: 1rem !important;
+    width: 100% !important;
+    align-items: start;
+  }
+
+  .mobile-header column-unit {
+    display: block;
+    grid-column: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0;
+  }
+
+  /*
+    Cargo's inline --font-scale values are relative to the 3rem
+    mobile H2 size: 3rem × .52 = 1.56rem.
+  */
+  .mobile-header h2 {
+    margin: 0;
+    color: #0021ff;
+    font-family: "Cirrus Cumulus", serif !important;
+    font-size: 1.56rem;
+    font-style: normal;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  .mobile-header__menu {
+    display: inline-block;
+    font-family: "ABC Social Condensed Light", "Arial Narrow", Arial, sans-serif !important;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .work-page,
+  .cv-page {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: auto;
+    margin: 0 !important;
+    padding: 1.25rem !important;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  /* Preserve explicit Cargo columns, including the 8/4 title row. */
+  .work-page column-set[mobile-stack="false"] {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+
+  .work-page column-set[mobile-stack="false"] > column-unit[span="4"] {
+    grid-column: span 4 !important;
+  }
+
+  .work-page column-set[mobile-stack="false"] > column-unit[span="8"] {
+    grid-column: span 8 !important;
+  }
+
+  .work-page column-set[mobile-stack="false"] > column-unit[span="12"] {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* All non-explicit work-page grids stack to one readable column. */
+  .work-page column-set:not([mobile-stack="false"]) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 2rem !important;
+    width: 100% !important;
+  }
+
+  .work-page column-set:not([mobile-stack="false"]) > column-unit {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+  }
+
+  .cargo-work-template media-item,
+  .cargo-work-template gallery-columnized media-item,
+  .cargo-work-template gallery-grid media-item,
+  .cargo-work-template gallery-justify media-item,
+  .cargo-work-template gallery-slideshow media-item {
+    min-height: 0;
+  }
+
+  .cargo-work-template gallery-columnized,
+  .cargo-work-template gallery-grid,
+  .cargo-work-template gallery-justify {
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  .cargo-work-template .local-project-media,
+  .cargo-work-template video.local-project-media {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto;
+  }
+
+  /* Mobile info page: exact two-column header and full-width overlay. */
+  [id="W0609300057"].page,
+  [id="W0609300057"] .page-layout,
+  [id="W0609300057"] .page-content {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none !important;
+  }
+
+  [id="W0609300057"] .page-content {
+    padding: 1.5rem !important;
+  }
+
+  .mobile-info-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 1rem !important;
+  }
+
+  /* 3rem × .4, matching the supplied inline --font-scale value. */
+  .mobile-info-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  /* Supplied mobile footer: 7/5 columns, aligned to page padding. */
+  [id="S0415376174"].page {
+    display: flex !important;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: auto;
+    justify-content: flex-start;
+  }
+
+  [id="S0415376174"] .page-layout {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100% !important;
+    padding: 0 1.5rem;
+  }
+
+  [id="S0415376174"] .page-content {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1.3rem 0 1.5rem;
+  }
+
+  [id="S0415376174"] column-set {
+    display: grid !important;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr) !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+
+  [id="S0415376174"] column-unit {
+    grid-column: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0;
+  }
+}
