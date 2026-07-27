@@ -247,6 +247,10 @@ def build() -> None:
 
         if source.suffix.lower() == ".html":
             text = source.read_text(encoding="utf-8")
+            text = text.replace(
+                "Ti%CC%80nh%20Ca",
+                "T%C3%ACnh%20Ca",
+            )
             text = REFERENCE_PATTERN.sub(
                 lambda match: rewrite_match(source, match),
                 text,
