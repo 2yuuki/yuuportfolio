@@ -269,6 +269,7 @@ def gallery_autoplay_source() -> str:
     if (!viewport || slides.length < 2) return;
 
     let index = 0;
+    let timer = null;
     viewport.style.scrollBehavior = "auto";
 
     const showSlide = (nextIndex) => {
@@ -283,7 +284,41 @@ def gallery_autoplay_source() -> str:
     });
 
     showSlide(0);
-    window.setInterval(() => showSlide(index + 1), AUTOPLAY_DELAY);
+
+    const startAutoplay = () => {
+      if (timer !== null) return;
+      timer = window.setInterval(
+        () => showSlide(index + 1),
+        AUTOPLAY_DELAY
+      );
+    };
+
+    const firstMedia = slides[0].querySelector("img, video");
+    if (!firstMedia) {
+      startAutoplay();
+      return;
+    }
+
+    const firstMediaIsReady = () => {
+      if (firstMedia.hasAttribute("data-media-src")) return false;
+      if (firstMedia.tagName === "IMG") {
+        return firstMedia.complete && firstMedia.naturalWidth > 1;
+      }
+      return firstMedia.readyState >= 1;
+    };
+
+    if (firstMediaIsReady()) {
+      startAutoplay();
+      return;
+    }
+
+    firstMedia.addEventListener("load", startAutoplay, { once: true });
+    firstMedia.addEventListener(
+      "loadedmetadata",
+      startAutoplay,
+      { once: true }
+    );
+    firstMedia.addEventListener("error", startAutoplay, { once: true });
   };
 
   document.querySelectorAll("[data-memory-slider]").forEach((gallery) => {
@@ -347,6 +382,9 @@ def build() -> None:
     gallery_autoplay_version = hashlib.sha256(
         gallery_autoplay.encode("utf-8")
     ).hexdigest()[:12]
+    stylesheet_version = hashlib.sha256(
+        (ROOT / "style.css").read_bytes()
+    ).hexdigest()[:12]
 
     for source in ROOT.rglob("*"):
         if not source.is_file() or is_excluded(source):
@@ -362,6 +400,16 @@ def build() -> None:
 
         if source.suffix.lower() == ".html":
             text = source.read_text(encoding="utf-8")
+            text = re.sub(
+                r'(?P<prefix>\bhref=["\'][^"\']*style\.css)'
+                r'(?:\?[^"\']*)?(?P<quote>["\'])',
+                (
+                    rf'\g<prefix>?v={stylesheet_version}'
+                    rf'\g<quote>'
+                ),
+                text,
+                flags=re.IGNORECASE,
+            )
             text = text.replace(
                 "Ti%CC%80nh%20Ca",
                 "T%C3%ACnh%20Ca",

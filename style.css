@@ -1808,6 +1808,14 @@ video.local-project-media {
   object-fit: contain;
 }
 
+.memory-output-slider--full-width-images .memory-output-slider__slide video {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
+
 .memory-output-slider__slide figcaption {
   position: absolute;
   right: 1rem;
