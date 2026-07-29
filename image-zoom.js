@@ -25,15 +25,10 @@
   `;
   document.body.appendChild(dialog);
 
-  const detailTooltip = document.createElement('div');
-  detailTooltip.className = 'artwork-detail-tooltip caption';
-  detailTooltip.setAttribute('role', 'status');
-  detailTooltip.hidden = true;
-  document.body.appendChild(detailTooltip);
-
   const zoomedImage = dialog.querySelector('.image-zoom-dialog__image');
   const caption = dialog.querySelector('.image-zoom-dialog__caption');
   const closeButton = dialog.querySelector('.image-zoom-dialog__close');
+  let panFrame = 0;
 
   const text = (element) => element?.textContent.trim() || '';
 
@@ -60,40 +55,6 @@
     }
 
     return image.alt.trim();
-  };
-
-  const positionTooltip = (event) => {
-    const gap = 14;
-    const bounds = detailTooltip.getBoundingClientRect();
-    const left = Math.min(
-      event.clientX + gap,
-      window.innerWidth - bounds.width - gap
-    );
-    const top = Math.min(
-      event.clientY + gap,
-      window.innerHeight - bounds.height - gap
-    );
-    detailTooltip.style.left = `${Math.max(gap, left)}px`;
-    detailTooltip.style.top = `${Math.max(gap, top)}px`;
-  };
-
-  const showDetails = (image, event) => {
-    const details = imageDetails(image);
-    if (!details) return;
-    detailTooltip.textContent = details;
-    detailTooltip.hidden = false;
-    if (event?.clientX || event?.clientY) {
-      positionTooltip(event);
-      return;
-    }
-
-    const bounds = image.getBoundingClientRect();
-    detailTooltip.style.left = `${Math.max(14, bounds.left + 14)}px`;
-    detailTooltip.style.top = `${Math.max(14, bounds.top + 14)}px`;
-  };
-
-  const hideDetails = () => {
-    detailTooltip.hidden = true;
   };
 
   const visibleArtworkImage = (image) => {
@@ -125,8 +86,8 @@
     caption.textContent = details;
     caption.hidden = !details;
 
-    hideDetails();
     dialog.classList.remove('is-magnified');
+    dialog.scrollTo({ left: 0, top: 0 });
     dialog.showModal();
     document.documentElement.classList.add('has-image-zoom-open');
     closeButton.focus({ preventScroll: true });
@@ -135,7 +96,29 @@
   const close = () => {
     dialog.close();
     dialog.classList.remove('is-magnified');
+    dialog.scrollTo({ left: 0, top: 0 });
     document.documentElement.classList.remove('has-image-zoom-open');
+  };
+
+  const panToPointer = (event) => {
+    if (!dialog.classList.contains('is-magnified')) return;
+
+    const pointerX = Math.min(
+      1,
+      Math.max(0, event.clientX / window.innerWidth)
+    );
+    const pointerY = Math.min(
+      1,
+      Math.max(0, event.clientY / window.innerHeight)
+    );
+
+    cancelAnimationFrame(panFrame);
+    panFrame = requestAnimationFrame(() => {
+      const horizontalRange = dialog.scrollWidth - dialog.clientWidth;
+      const verticalRange = dialog.scrollHeight - dialog.clientHeight;
+      dialog.scrollLeft = Math.max(0, horizontalRange * pointerX);
+      dialog.scrollTop = Math.max(0, verticalRange * pointerY);
+    });
   };
 
   artworkImages.forEach((image) => {
@@ -148,11 +131,6 @@
       `Zoom image: ${imageDetails(image) || image.alt || 'project artwork'}`
     );
 
-    image.addEventListener('mouseenter', (event) => showDetails(image, event));
-    image.addEventListener('mousemove', positionTooltip);
-    image.addEventListener('mouseleave', hideDetails);
-    image.addEventListener('focus', () => showDetails(image));
-    image.addEventListener('blur', hideDetails);
     image.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
@@ -172,10 +150,16 @@
     });
   });
 
-  zoomedImage.addEventListener('click', () => {
+  zoomedImage.addEventListener('click', (event) => {
     dialog.classList.toggle('is-magnified');
+    if (!dialog.classList.contains('is-magnified')) {
+      dialog.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
+      return;
+    }
+    requestAnimationFrame(() => panToPointer(event));
   });
 
+  dialog.addEventListener('mousemove', panToPointer);
   closeButton.addEventListener('click', close);
 
   dialog.addEventListener('click', (event) => {
@@ -184,8 +168,7 @@
 
   dialog.addEventListener('close', () => {
     dialog.classList.remove('is-magnified');
+    dialog.scrollTo({ left: 0, top: 0 });
     document.documentElement.classList.remove('has-image-zoom-open');
   });
-
-  window.addEventListener('scroll', hideDetails, { passive: true });
 })();
