@@ -1,11 +1,18 @@
 from pathlib import Path
 from urllib.parse import quote, unquote
 import hashlib
+import os
 import re
 import shutil
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "_site"
+OUTPUT = Path(
+    os.environ.get(
+        "SITE_OUTPUT",
+        Path(tempfile.gettempdir()) / "yuuportfolio-site",
+    )
+).expanduser().resolve()
 FAVICON = ROOT / "favicon.png"
 SITE_BASE = "/yuuportfolio/"
 MEDIA_ROUTE = SITE_BASE + "__media__/"
@@ -193,20 +200,50 @@ self.addEventListener("fetch", (event) => {{
 
 def media_loader_source() -> str:
     return f"""(() => {{
-  const loadMedia = () => {{
-    document.querySelectorAll("[data-media-src]").forEach((element) => {{
+  const loadElement = (element) => {{
+    if (element.dataset.mediaSrc) {{
       element.src = element.dataset.mediaSrc;
       element.removeAttribute("data-media-src");
-      if (element.tagName === "VIDEO") element.load();
-    }});
-    document.querySelectorAll("[data-media-poster]").forEach((element) => {{
+      if (element.tagName === "VIDEO") {{
+        element.preload = "none";
+        element.load();
+        if (element.dataset.autoplay === "true") {{
+          element.play().catch(() => {{}});
+        }}
+      }}
+    }}
+    if (element.dataset.mediaPoster) {{
       element.poster = element.dataset.mediaPoster;
       element.removeAttribute("data-media-poster");
-    }});
+    }}
+  }};
+
+  const observeMedia = () => {{
+    const media = Array.from(document.querySelectorAll(
+      "[data-media-src], [data-media-poster]"
+    ));
+    if (!media.length) return;
+
+    if (!("IntersectionObserver" in window)) {{
+      media.forEach(loadElement);
+      return;
+    }}
+
+    const observer = new IntersectionObserver(
+      (entries) => {{
+        entries.forEach((entry) => {{
+          if (!entry.isIntersecting) return;
+          loadElement(entry.target);
+          observer.unobserve(entry.target);
+        }});
+      }},
+      {{ rootMargin: "300px 0px", threshold: 0.01 }}
+    );
+    media.forEach((element) => observer.observe(element));
   }};
 
   if (!("serviceWorker" in navigator)) {{
-    loadMedia();
+    observeMedia();
     return;
   }}
 
@@ -215,162 +252,23 @@ def media_loader_source() -> str:
     .then(() => navigator.serviceWorker.ready)
     .then(() => {{
       if (navigator.serviceWorker.controller) {{
-        loadMedia();
+        observeMedia();
         return;
       }}
 
       navigator.serviceWorker.addEventListener(
         "controllerchange",
-        loadMedia,
+        observeMedia,
         {{ once: true }}
       );
     }})
-    .catch(loadMedia);
+    .catch(observeMedia);
 }})();
 """
 
 
 def gallery_autoplay_source() -> str:
-    return """(() => {
-  const AUTOPLAY_DELAY = 300;
-
-  const activateMedia = (slide, active) => {
-    slide.style.display = active ? "block" : "none";
-    slide.setAttribute("aria-hidden", active ? "false" : "true");
-    slide.querySelectorAll("video").forEach((video) => {
-      if (active) {
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-      }
-    });
-  };
-
-  document.querySelectorAll("gallery-slideshow").forEach((gallery) => {
-    const slides = Array.from(gallery.children).filter(
-      (child) => child.tagName === "MEDIA-ITEM"
-    );
-    if (slides.length < 2) return;
-
-    let index = 0;
-    const showSlide = (nextIndex) => {
-      index = (nextIndex + slides.length) % slides.length;
-      gallery.dataset.autoplayIndex = String(index);
-      slides.forEach((slide, slideIndex) => {
-        activateMedia(slide, slideIndex === index);
-      });
-    };
-
-    showSlide(0);
-    window.setInterval(() => showSlide(index + 1), AUTOPLAY_DELAY);
-  });
-
-  const startScrollingGallery = (viewport, slides) => {
-    if (!viewport || slides.length < 2) return;
-
-    let index = 0;
-    let timer = null;
-    viewport.style.scrollBehavior = "auto";
-
-    const showSlide = (nextIndex) => {
-      index = (nextIndex + slides.length) % slides.length;
-      viewport.dataset.autoplayIndex = String(index);
-      viewport.scrollLeft = Math.round(index * viewport.clientWidth);
-    };
-
-    viewport.addEventListener("scrollend", () => {
-      if (!viewport.clientWidth) return;
-      index = Math.round(viewport.scrollLeft / viewport.clientWidth);
-    });
-
-    showSlide(0);
-
-    const startAutoplay = () => {
-      if (timer !== null) return;
-      timer = window.setInterval(
-        () => showSlide(index + 1),
-        AUTOPLAY_DELAY
-      );
-    };
-
-    const firstMedia = slides[0].querySelector("img, video");
-    if (!firstMedia) {
-      startAutoplay();
-      return;
-    }
-
-    const firstMediaIsReady = () => {
-      if (firstMedia.hasAttribute("data-media-src")) return false;
-      if (firstMedia.tagName === "IMG") {
-        return firstMedia.complete && firstMedia.naturalWidth > 1;
-      }
-      return firstMedia.readyState >= 1;
-    };
-
-    if (firstMediaIsReady()) {
-      startAutoplay();
-      return;
-    }
-
-    firstMedia.addEventListener("load", startAutoplay, { once: true });
-    firstMedia.addEventListener(
-      "loadedmetadata",
-      startAutoplay,
-      { once: true }
-    );
-    firstMedia.addEventListener("error", startAutoplay, { once: true });
-  };
-
-  document.querySelectorAll("[data-memory-slider]").forEach((gallery) => {
-    const viewport = gallery.querySelector("[data-slider-track]");
-    const slides = Array.from(
-      gallery.querySelectorAll(".memory-output-slider__slide")
-    );
-    startScrollingGallery(viewport, slides);
-  });
-
-  document
-    .querySelectorAll("[data-project-horizontal-gallery]")
-    .forEach((gallery) => {
-      const viewport = gallery.querySelector(
-        ".project-horizontal-gallery__viewport"
-      );
-      const slides = Array.from(
-        gallery.querySelectorAll(".project-horizontal-gallery__slide")
-      );
-      startScrollingGallery(viewport, slides);
-    });
-
-  document.querySelectorAll("[data-horizontal-gallery]").forEach((gallery) => {
-    const viewport = gallery.querySelector(
-      ".homepage-horizontal-gallery__viewport"
-    );
-    const slides = Array.from(
-      gallery.querySelectorAll(".homepage-horizontal-gallery__slide")
-    );
-    startScrollingGallery(viewport, slides);
-  });
-
-  document.querySelectorAll(".project-card__rotator").forEach((rotator) => {
-    const slides = Array.from(rotator.querySelectorAll("img"));
-    if (slides.length < 2) return;
-
-    let index = 0;
-    const showSlide = (nextIndex) => {
-      index = (nextIndex + slides.length) % slides.length;
-      rotator.dataset.autoplayIndex = String(index);
-      slides.forEach((slide, slideIndex) => {
-        slide.style.animation = "none";
-        slide.style.display = "block";
-        slide.style.opacity = slideIndex === index ? "1" : "0";
-      });
-    };
-
-    showSlide(0);
-    window.setInterval(() => showSlide(index + 1), AUTOPLAY_DELAY);
-  });
-})();
-"""
+    return (ROOT / "gallery-autoplay.js").read_text(encoding="utf-8")
 
 
 def build() -> None:
@@ -431,21 +329,25 @@ def build() -> None:
                 f'<link rel="icon" type="image/png" href="{SITE_BASE}favicon.png">'
             )
             if "</head>" in text:
+                runtime_tags = f"{loader_tag}\n"
+                if "gallery-autoplay.js" not in text:
+                    runtime_tags += f"{gallery_autoplay_tag}\n"
                 text = text.replace(
                     "</head>",
                     (
                         f"{favicon_tag}\n"
-                        f"{loader_tag}\n"
-                        f"{gallery_autoplay_tag}\n"
+                        f"{runtime_tags}"
                         "</head>"
                     ),
                     1,
                 )
             else:
+                runtime_tags = loader_tag + "\n"
+                if "gallery-autoplay.js" not in text:
+                    runtime_tags += gallery_autoplay_tag + "\n"
                 text = (
                     favicon_tag + "\n" +
-                    loader_tag + "\n" +
-                    gallery_autoplay_tag + "\n" +
+                    runtime_tags +
                     text
                 )
             destination.write_text(text, encoding="utf-8")

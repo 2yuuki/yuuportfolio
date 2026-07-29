@@ -18,6 +18,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SITE_OUTPUT: ${{ runner.temp }}/yuuportfolio-site
     steps:
       - name: Check out website
         uses: actions/checkout@v4
@@ -33,7 +35,7 @@ jobs:
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: ${{ env.SITE_OUTPUT }}
 
   deploy:
     environment:
@@ -45,4 +47,3 @@ jobs:
       - name: Publish
         id: deployment
         uses: actions/deploy-pages@v4
-

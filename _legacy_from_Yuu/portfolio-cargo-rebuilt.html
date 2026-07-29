@@ -1,0 +1,893 @@
+<!-- PORTFOLIO / CARGO PAGE — rebuilt 2026 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --portfolio-ink: #000;
+    --portfolio-muted: rgba(0, 0, 0, 0.42);
+    --portfolio-line: rgba(0, 0, 0, 0.14);
+    --portfolio-gap: 2rem;
+    --portfolio-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  html {
+    min-width: 320px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  /* Cargo custom-element fallback for this local HTML preview. */
+  column-set {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem;
+    width: 100%;
+  }
+
+  column-set[gutter="1"],
+  column-set[gutter="1rem"] {
+    gap: 1rem;
+  }
+
+  column-set[gutter="2rem"] {
+    gap: 2rem;
+  }
+
+  column-unit {
+    display: block;
+    min-width: 0;
+  }
+
+  column-unit[span="1"] { grid-column: span 1; }
+  column-unit[span="2"] { grid-column: span 2; }
+  column-unit[span="3"] { grid-column: span 3; }
+  column-unit[span="4"] { grid-column: span 4; }
+  column-unit[span="5"] { grid-column: span 5; }
+  column-unit[span="6"] { grid-column: span 6; }
+  column-unit[span="7"] { grid-column: span 7; }
+  column-unit[span="8"] { grid-column: span 8; }
+  column-unit[span="9"] { grid-column: span 9; }
+  column-unit[span="10"] { grid-column: span 10; }
+  column-unit[span="11"] { grid-column: span 11; }
+  column-unit[span="12"] { grid-column: span 12; }
+
+  media-item,
+  gallery-slideshow,
+  digital-clock {
+    display: block;
+  }
+
+  text-icon {
+    display: inline;
+  }
+
+  .mobile-header,
+  .mobile-info-overlay,
+  .mobile-work-footer {
+    display: none;
+  }
+
+  /* PAGE LAYOUT / Cargo page R1116398685 */
+  [id="R1116398685"].page {
+    justify-content: flex-end;
+    min-height: auto;
+  }
+
+  [id="R1116398685"] .page-layout {
+    width: 100%;
+    max-width: 66%;
+    align-items: flex-start;
+  }
+
+  [id="R1116398685"] .page-content {
+    max-width: none;
+    padding: 1rem;
+    border: 0 solid rgba(0, 0, 0, 0.15);
+    text-align: left;
+  }
+
+  /* Two-column fallback: also works when this file is opened outside Cargo */
+  .portfolio-index {
+    width: 66%;
+    margin-left: 34%;
+    padding: 1rem;
+    font-family: "A B C Connect Unlicensed Trial", Arial, sans-serif;
+  }
+
+  [id="R1116398685"] .portfolio-index {
+    width: 100%;
+    margin-left: 0;
+    padding: 0;
+  }
+
+  /* FIXED LEFT NAV */
+  .portfolio-sidebar {
+    position: fixed;
+    z-index: 20;
+    top: 1rem;
+    bottom: 1rem;
+    left: clamp(1rem, 3.25vw, 4.25rem);
+    width: clamp(19rem, 27vw, 34rem);
+    padding-right: clamp(1rem, 2vw, 2.5rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: var(--portfolio-ink);
+    text-align: left;
+    scrollbar-width: none;
+    overscroll-behavior: contain;
+  }
+
+  .portfolio-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .portfolio-sidebar a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .portfolio-sidebar a:hover,
+  .portfolio-sidebar a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+
+  .portfolio-sidebar a:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 0.2rem;
+  }
+
+  .portfolio-sidebar__logo {
+    margin: 0 0 2rem;
+    color: #0021ff;
+    font-size: clamp(3rem, 4vw, 5.2rem);
+    font-weight: 400;
+    line-height: 0.72;
+    letter-spacing: -0.055em;
+  }
+
+  .portfolio-sidebar__bio {
+    max-width: 31rem;
+    margin: 0;
+    color: var(--portfolio-muted);
+    font-size: 0.98rem;
+    line-height: 1.22;
+  }
+
+  .portfolio-sidebar__name,
+  .portfolio-sidebar__links,
+  .portfolio-sidebar__work-label {
+    color: #0021ff;
+  }
+
+  .portfolio-sidebar__name {
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+
+  .portfolio-sidebar__links {
+    margin-top: 2.4rem;
+    line-height: 1.12;
+  }
+
+  .portfolio-sidebar__work-label {
+    display: block;
+    margin-top: 1.4rem;
+  }
+
+  .portfolio-sidebar__categories {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.7rem 2rem;
+    margin-top: 2rem;
+    padding-bottom: 1rem;
+    font-size: 0.93rem;
+    line-height: 1.18;
+  }
+
+  .portfolio-sidebar__group {
+    min-width: 0;
+  }
+
+  .portfolio-sidebar__group-title {
+    margin: 0 0 0.25rem;
+    font-weight: 700;
+  }
+
+  .portfolio-sidebar__items {
+    margin: 0;
+    padding-left: 2.15rem;
+  }
+
+  .portfolio-sidebar__items li {
+    padding-left: 0.15rem;
+  }
+
+  .portfolio-index,
+  .portfolio-index * {
+    box-sizing: border-box;
+  }
+
+  .portfolio-intro {
+    align-items: start;
+    margin: 1rem 0 7rem;
+  }
+
+  .portfolio-kicker,
+  .portfolio-section__number,
+  .portfolio-clock,
+  .project-card__action {
+    font-size: 0.82rem;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .portfolio-intro__title {
+    display: block;
+    max-width: 17ch;
+    margin-top: 0.55rem;
+    font-size: clamp(2.4rem, 5.5vw, 6.8rem);
+    font-weight: 700;
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+  }
+
+  .portfolio-intro__note {
+    max-width: 34rem;
+    margin: 1rem 0 0;
+    color: var(--portfolio-muted);
+    line-height: 1.35;
+  }
+
+  .portfolio-clock {
+    color: var(--portfolio-muted);
+    text-align: right;
+  }
+
+  .portfolio-section {
+    margin-top: 10rem;
+  }
+
+  .portfolio-section:first-of-type {
+    margin-top: 0;
+  }
+
+  .portfolio-section__head {
+    align-items: baseline;
+    padding-bottom: 0.7rem;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--portfolio-line);
+  }
+
+  .portfolio-section__title {
+    font-size: clamp(1.35rem, 2.2vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  .portfolio-section__number {
+    color: var(--portfolio-muted);
+    text-align: right;
+  }
+
+  .project-row {
+    align-items: flex-start;
+    margin-bottom: 7rem;
+  }
+
+  .project-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .project-card {
+    min-width: 0;
+  }
+
+  .project-card > a,
+  .project-card > .project-card__inner {
+    display: block !important;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .project-card media-item,
+  .project-card gallery-slideshow {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    background: transparent !important;
+  }
+
+  .project-card > a media-item,
+  .project-card > a gallery-slideshow {
+    pointer-events: none !important;
+  }
+
+  .project-card .memory-index-thumbnail {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .project-card__meta {
+    margin-top: 0.85rem;
+  }
+
+  .project-card__topline {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid transparent;
+    transition: border-color 220ms ease;
+  }
+
+  .project-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .project-card__action {
+    flex: 0 0 auto;
+    transition: transform 220ms var(--portfolio-ease);
+  }
+
+  .project-card__detail {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--portfolio-muted);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .project-card > a:hover .project-card__topline,
+  .project-card > a:focus-visible .project-card__topline {
+    border-color: var(--portfolio-ink);
+  }
+
+  .project-card > a:hover .project-card__action,
+  .project-card > a:focus-visible .project-card__action {
+    transform: translateX(0.3rem);
+  }
+
+  .project-card > a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 0.35rem;
+  }
+
+  .portfolio-reveal {
+    opacity: 0;
+    transform: translateY(2rem);
+    transition: opacity 750ms var(--portfolio-ease), transform 750ms var(--portfolio-ease);
+    will-change: opacity, transform;
+  }
+
+  .portfolio-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    html,
+    body {
+      width: 100%;
+      min-width: 0;
+      overflow-x: clip;
+    }
+
+    [id="R1116398685"].page {
+      display: block;
+    }
+
+    [id="R1116398685"] .page-layout {
+      max-width: 100%;
+    }
+
+    [id="R1116398685"] .page-content {
+      width: 100%;
+      padding: 1rem;
+    }
+
+    .portfolio-sidebar {
+      display: none !important;
+    }
+
+    .mobile-header {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 1rem 1.5rem;
+      background: #fff;
+    }
+
+    .mobile-header column-set {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+      gap: 1rem;
+    }
+
+    .mobile-header h2 {
+      margin: 0;
+      color: #0021ff;
+      font-size: clamp(2.8rem, 13vw, 4rem);
+      line-height: 0.72;
+    }
+
+    .portfolio-index,
+    [id="R1116398685"] .portfolio-index {
+      width: 100%;
+      margin-left: 0;
+      box-sizing: border-box;
+      padding: 1rem 1.5rem 4rem;
+    }
+
+    .portfolio-intro {
+      margin-bottom: 5rem;
+    }
+
+    .portfolio-intro__title {
+      max-width: 10ch;
+      font-size: clamp(3rem, 15vw, 5.5rem);
+    }
+
+    .portfolio-intro column-unit:first-child {
+      width: 78% !important;
+      flex: 0 0 78% !important;
+      max-width: 78% !important;
+    }
+
+    .portfolio-intro column-unit:last-child {
+      width: 22% !important;
+      flex: 0 0 22% !important;
+      max-width: 22% !important;
+    }
+
+    .portfolio-intro__note {
+      max-width: 90%;
+    }
+
+    .portfolio-section {
+      margin-top: 7rem;
+    }
+
+    .portfolio-section__head {
+      margin-bottom: 2rem;
+    }
+
+    .project-row {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      margin-bottom: 0 !important;
+    }
+
+    .project-row > column-unit {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      flex: 0 0 100% !important;
+      max-width: 100% !important;
+      margin-top: 0 !important;
+      margin-bottom: 3.75rem !important;
+    }
+
+    .project-row > column-unit:empty {
+      display: none !important;
+    }
+
+    .mobile-info-overlay {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: none;
+      min-height: 100vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.76);
+      -webkit-backdrop-filter: blur(0.5rem);
+      backdrop-filter: blur(0.5rem);
+    }
+
+    .mobile-info-overlay:target {
+      display: block;
+    }
+
+    .mobile-info-overlay column-set {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .mobile-info-overlay h2 {
+      margin: 0;
+      color: #0021ff;
+      font-size: clamp(2rem, 10vw, 2.8rem);
+      line-height: 1.1;
+    }
+
+    .mobile-info-overlay a,
+    .mobile-header a,
+    .mobile-work-footer a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .mobile-info-overlay ol.work-categories {
+      margin-top: 0.5rem;
+      padding-left: 0;
+      list-style-type: none;
+    }
+
+    .mobile-info-overlay ol.work-items {
+      margin-top: 0.25rem;
+      padding-left: 1rem;
+    }
+
+    .mobile-info-overlay li {
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .mobile-work-footer {
+      display: flex;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 1.5rem;
+      background: #fff;
+    }
+
+    .mobile-work-footer .page-layout,
+    .mobile-work-footer .page-content {
+      width: 100%;
+    }
+
+    .mobile-work-footer .page-content {
+      padding: 1.3rem 0 1.5rem;
+      border-top: 0.1rem solid rgba(0, 0, 0, 0.75);
+    }
+
+    .mobile-work-footer column-set {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    text-icon[icon="upwards-arrow"]::after {
+      content: "↑";
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portfolio-reveal,
+    .project-card__action {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+
+<div id="top"></div>
+
+<header class="mobile-header" aria-label="Mobile header">
+  <column-set mobile-stack="false" gutter="1">
+    <column-unit span="9" slot="0">
+      <h2 style="--font-scale: 0.52;">¶{¥uu<br>wØuld<br>ńéver}↝↝</h2>
+    </column-unit>
+    <column-unit span="3" slot="1">
+      <div style="text-align: right"><a rel="history" href="#mobile-info">Menu</a></div>
+    </column-unit>
+  </column-set>
+</header>
+
+<section id="mobile-info" class="mobile-info-overlay" aria-label="Mobile information and work index">
+  <column-set gutter="1" mobile-stack="false">
+    <column-unit slot="0">
+      <b>
+        <a href="#top" rel="home-page" style="text-decoration: none; --font-scale: 0.4;">
+          <h2 style="--font-scale: 0.4; line-height: 1.1; margin: 0;">¶{¥uu<br>wØuld<br>ńéver}↝↝</h2>
+        </a>
+      </b>
+    </column-unit>
+    <column-unit slot="1">
+      <div style="text-align: right">
+        <a href="#top" rel="close-overlay" style="--font-scale: 0.95;">Close</a>
+      </div>
+    </column-unit>
+  </column-set>
+
+  <br>
+
+  <span style="color: rgba(0, 0, 0, 0.4);"><span class="bodycopy-serif"><br>
+  Nguyen Thu Trang (yuuwouldnever)</span>
+  <span style="color: rgba(0, 0, 0, 0.4);">is a Vietnamese multidisciplinary visual designer whose practice investigates the beauty of everyday life through functional visual works. She makes work that serves a purpose: to open reflection, communicate social conditions, or give form to inner experience. Her creative process is introspective yet communicative.</span><br>
+  <br></span><br><br>
+
+  <span class="bodycopy-serif">
+    <a href="contact-form" rel="history">Email</a><br>
+    <a href="cv" rel="history">CV</a><br>
+    <a href="https://www.instagram.com/yuuwouldnever/" target="_blank" rel="noopener">Instagram<text-icon icon="north-east-arrow"></text-icon></a><br>
+  </span><br>
+
+  <span class="bodycopy-serif">Work<text-icon icon="downwards-arrow"></text-icon></span>
+
+  <ol class="work-categories" style="list-style-type: none; padding-left: 0; margin-top: 0.5rem;">
+    <li><b>00 / Featured</b>
+      <ol class="work-items" type="1">
+        <li><a href="the-memory-index" rel="history">The Memory Index</a></li>
+      </ol>
+    </li>
+    <br>
+
+    <li><b>01 / Design</b>
+      <ol class="work-items" type="1">
+        <li><a href="tinh-ca-2" rel="history">Tinh Ca</a></li>
+        <li><a href="threads-of-go-vap-1" rel="history">Threads of Go Vap</a></li>
+        <li><a href="hear-the-wind-sings-1" rel="history">Hear The Wind Sings</a></li>
+        <li>Chi Le</li>
+      </ol>
+    </li>
+    <br>
+
+    <li><b>02 / CGI</b>
+      <ol class="work-items" type="1">
+        <li><a href="kieu-1" rel="history">Kieu</a></li>
+      </ol>
+    </li>
+    <br>
+
+    <li><b>03 / Motion</b>
+      <ol class="work-items" type="1">
+        <li><a href="when-the-clock-chimes-1" rel="history">When The Clock Chimes</a></li>
+        <li><a href="tuna-piece-1" rel="history">Tuna Piece</a></li>
+        <li><a href="to-be-human" rel="history">To Be Human</a></li>
+      </ol>
+    </li>
+    <br>
+
+    <li><b>04 / Interactive</b>
+      <ol class="work-items" type="1">
+        <li><a href="veil-1" rel="history">Veil</a></li>
+        <li><a href="pedestrian-aid-lines" rel="history">Pedestrian Aid Lines</a></li>
+      </ol>
+    </li>
+    <br>
+
+    <li><b>05 / Print</b>
+      <ol class="work-items" type="1">
+        <li>The Dream Is A Snail</li>
+        <li>Chi Le</li>
+        <li>Hoe Dj Party</li>
+      </ol>
+    </li>
+    <br>
+
+    <li><b>06 / Music Video</b>
+      <ol class="work-items" type="1">
+        <li>Em Muon Duoc Bay (Vstra)</li>
+        <li>Sau Con Suy (Rhyder)</li>
+        <li>Doiii (Hau Hoang)</li>
+      </ol>
+    </li>
+    <br>
+
+    <li><b>07 / Commercials</b>
+      <ol class="work-items" type="1">
+        <li><a href="cocoon-nuoc-tay-trang-sen" rel="history">Cocoon - Nuoc Tay Trang Sen</a></li>
+        <li><a href="cocoon-healing" rel="history">Cocoon - Finding The Healing</a></li>
+        <li>Ponnie Meat Snack</li>
+        <li>Vinamilk Sua Hat</li>
+        <li>Gillette Vector 3</li>
+        <li>FC Online | Prime Cong Phuong</li>
+        <li>Vietjet Airlines</li>
+        <li><a href="tiktokshop-3-3" rel="history">TikTok Shop 3.3</a></li>
+        <li>TikTok Award 2024</li>
+        <li><a href="tiktokshop-9-9" rel="history">TikTokShop 9.9</a></li>
+        <li>Pantene x Anh Tu Atus</li>
+        <li><a href="the5way-phu-quoc" rel="history">The 5 Way</a></li>
+      </ol>
+    </li>
+  </ol>
+</section>
+
+<aside class="portfolio-sidebar" aria-label="About and work index">
+  <h2 class="portfolio-sidebar__logo">{¥uu<br>wØuld<br>ńéver}</h2>
+
+  <p class="portfolio-sidebar__bio">
+    <span class="portfolio-sidebar__name bodycopy-serif">Nguyen Thu Trang (yuuwouldnever)</span>
+    is a Vietnamese multidisciplinary visual designer whose practice investigates the beauty of everyday life through functional visual works. She makes work that serves a purpose: to open reflection, communicate social conditions, or give form to inner experience. Her creative process is introspective yet communicative.
+  </p>
+
+  <nav class="portfolio-sidebar__links bodycopy-serif" aria-label="Contact links">
+    <a href="contact-form" rel="history">Email</a><br>
+    <a href="cv" rel="history">CV</a><br>
+    <a href="https://www.instagram.com/yuuwouldnever/" target="_blank" rel="noopener">Instagram ↗</a>
+  </nav>
+
+  <span class="portfolio-sidebar__work-label bodycopy-serif">Work ↓</span>
+
+  <nav class="portfolio-sidebar__categories" aria-label="Project categories">
+    <div class="portfolio-sidebar__group">
+      <p class="portfolio-sidebar__group-title">00 / Featured</p>
+      <ol class="portfolio-sidebar__items"><li><a href="the-memory-index" rel="history">The Memory Index</a></li></ol>
+    </div>
+
+    <div class="portfolio-sidebar__group">
+      <p class="portfolio-sidebar__group-title">04 / Interactive</p>
+      <ol class="portfolio-sidebar__items"><li><a href="veil-1" rel="history">Veil</a></li><li><a href="pedestrian-aid-lines" rel="history">Pedestrian Aid Lines</a></li></ol>
+    </div>
+
+    <div class="portfolio-sidebar__group">
+      <p class="portfolio-sidebar__group-title">01 / Typography</p>
+      <ol class="portfolio-sidebar__items"><li><a href="tinh-ca-2" rel="history">Tinh Ca</a></li><li><a href="threads-of-go-vap-1" rel="history">Threads of Go Vap</a></li><li><a href="hear-the-wind-sings-1" rel="history">Hear The Wind Sings</a></li></ol>
+    </div>
+
+    <div class="portfolio-sidebar__group">
+      <p class="portfolio-sidebar__group-title">05 / Print</p>
+      <ol class="portfolio-sidebar__items"><li>The Dream Is A Snail</li><li>Chronotope Exhibition</li><li>Chi Le</li><li>Hoè DJ Party</li></ol>
+    </div>
+
+    <div class="portfolio-sidebar__group">
+      <p class="portfolio-sidebar__group-title">02 / Character Design</p>
+      <ol class="portfolio-sidebar__items"><li><a href="kieu-1" rel="history">Kieu</a></li></ol>
+    </div>
+
+    <div class="portfolio-sidebar__group">
+      <p class="portfolio-sidebar__group-title">06 / Music Video</p>
+      <ol class="portfolio-sidebar__items"><li><a href="em-muon-duoc-bay-(vstra)" rel="history">Em Muon Duoc Bay (Vstra)</a></li><li><a href="sau-con-suy-(rhyder)" rel="history">Sau Con Suy (Rhyder)</a></li><li><a href="doiii-(hau-hoang)" rel="history">Doiii (Hau Hoang)</a></li></ol>
+    </div>
+
+    <div class="portfolio-sidebar__group">
+      <p class="portfolio-sidebar__group-title">03 / Motion</p>
+      <ol class="portfolio-sidebar__items"><li><a href="when-the-clock-chimes-1" rel="history">When The Clock Chimes</a></li><li><a href="tuna-piece-1" rel="history">Tuna Piece</a></li><li><a href="to-be-human" rel="history">To Be Human</a></li></ol>
+    </div>
+
+    <div class="portfolio-sidebar__group">
+      <p class="portfolio-sidebar__group-title">07 / Commercials</p>
+      <ol class="portfolio-sidebar__items"><li><a href="cocoon-nuoc-tay-trang-sen" rel="history">Cocoon — Nuoc Tay Trang Sen</a></li><li><a href="cocoon-healing" rel="history">Cocoon — Finding The Healing</a></li><li><a href="ponnie-meat-snack-x-son-tung-mtp" rel="history">Ponnie Meat Snack</a></li><li><a href="vinamilk-sua-hat" rel="history">Vinamilk Sua Hat</a></li><li><a href="gillette-vector-3" rel="history">Gillette Vector 3</a></li><li><a href="fc-online-prime-cong-phuong" rel="history">FC Online | Prime Cong Phuong</a></li><li><a href="vietjet-airlines" rel="history">Vietjet Airlines</a></li><li><a href="tiktokshop-3-3" rel="history">TikTok Shop 3.3</a></li><li><a href="tiktok-awards-2024" rel="history">TikTok Award 2024</a></li><li><a href="tiktokshop-9-9" rel="history">TikTok Shop 9.9</a></li><li><a href="pantenexatus" rel="history">Pantene × Anh Tu Atus</a></li><li><a href="the5way-phu-quoc" rel="history">The 5 Way</a></li></ol>
+    </div>
+  </nav>
+</aside>
+
+<div class="portfolio-index">
+  <column-set class="portfolio-intro" gutter="1rem" mobile-hide-empty="false" mobile-stack="false">
+    <column-unit slot="0" span="9">
+      <span class="portfolio-kicker">Selected works / 2022—2026</span>
+      <span class="portfolio-intro__title">Moving images, visual systems &amp; creative technology.</span>
+      <p class="portfolio-intro__note">An evolving index of independent experiments, commissioned work and collaborative productions.</p>
+    </column-unit>
+    <column-unit slot="1" span="3">
+      <div class="portfolio-clock">SGN&nbsp; <digital-clock pad-hour="true" twentyfour-hour="true" value="{hour}:{minute}"></digital-clock></div>
+    </column-unit>
+  </column-set>
+
+  <section class="portfolio-section">
+    <column-set class="portfolio-section__head" gutter="1rem" mobile-stack="false">
+      <column-unit slot="0" span="10"><div class="portfolio-section__title">Interactive &amp; Creative Technology</div></column-unit>
+      <column-unit slot="1" span="2"><div class="portfolio-section__number">01 / 07</div></column-unit>
+    </column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit slot="0" span="2"></column-unit><column-unit class="project-card" slot="1" span="8">
+      <a href="the-memory-index" rel="history"><media-item autoplay="true" disable-zoom="true" hash="G2904552217655805573652847806384" loop="true" muted="true" playsinline="true"><img class="memory-index-thumbnail" src="./assets/the-memory-index-thumbnail.png" alt="The Memory Index"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">The Memory Index</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Code &amp; Print · 2025</span></div></a>
+    </column-unit><column-unit slot="2" span="2"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="5">
+      <a href="veil-1" rel="history"><media-item disable-zoom="true" hash="U2442284795970943723851271653296" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Veil</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Unreal Engine Game · 2025</span></div></a>
+    </column-unit><column-unit slot="1" span="1"></column-unit><column-unit class="project-card" slot="2" span="5" style="margin-top:5rem">
+      <a href="pedestrian-aid-lines" rel="history"><media-item disable-zoom="true" hash="V2919360963854120963172863330224" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Pedestrian Aid Lines</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Unity Game · 2024</span></div></a>
+    </column-unit><column-unit slot="3" span="1"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="6">
+      <a href="kieu-1" rel="history"><media-item autoplay="true" disable-zoom="true" hash="C2440625718590683217810224859056" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Kieu</span><span class="project-card__action">View →</span></div><span class="project-card__detail">3D Character Design · 2023</span></div></a>
+    </column-unit><column-unit slot="1" span="1"></column-unit><column-unit class="project-card" slot="2" span="5" style="margin-top:7rem">
+      <a href="when-the-clock-chimes-1" rel="history"><media-item disable-zoom="true" hash="P2442260488032195010121563391920" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">When The Clock Chimes</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Stop-motion &amp; CGI · 2025</span></div></a>
+    </column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit slot="0" span="1"></column-unit><column-unit class="project-card" slot="1" span="4" style="margin-top:2rem">
+      <a href="to-be-human" rel="history"><media-item autoplay="true" disable-zoom="true" hash="I2536615672163102783042769668016" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">To Be Human</span><span class="project-card__action">View →</span></div><span class="project-card__detail">3D &amp; After Effects · 2023</span></div></a>
+    </column-unit><column-unit slot="2" span="1"></column-unit><column-unit class="project-card" slot="3" span="5">
+      <a href="tuna-piece-1" rel="history"><media-item autoplay="true" disable-zoom="true" hash="D2442260886924588860016907536304" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Tuna Piece</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Illustration &amp; Motion · 2023</span></div></a>
+    </column-unit><column-unit slot="4" span="1"></column-unit></column-set>
+  </section>
+
+  <section class="portfolio-section">
+    <column-set class="portfolio-section__head" gutter="1rem" mobile-stack="false"><column-unit slot="0" span="10"><div class="portfolio-section__title">Typography &amp; Visuals</div></column-unit><column-unit slot="1" span="2"><div class="portfolio-section__number">02 / 08</div></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit slot="0" span="2"></column-unit><column-unit class="project-card" slot="1" span="8">
+      <a href="tinh-ca-2" rel="history"><gallery-slideshow autoplay="false" gutter="1rem" mobile-navigation="buttons" navigation="cursor-zones" transition-speed="0.5"><media-item hash="Y2961742104185782066366711613360" limit-by="width" scale="100" slot="slot-0"></media-item><media-item hash="O2961742104204228810440421164976" limit-by="width" scale="100" slot="slot-1"></media-item></gallery-slideshow><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Overstimulated</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Poster · 2026</span></div></a>
+    </column-unit><column-unit slot="2" span="2"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="5">
+      <a href="tinh-ca-2" rel="history"><media-item autoplay="true" disable-zoom="true" hash="J2449282594105406913229044860848" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Tinh Ca</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Custom Typography · 2024</span></div></a>
+    </column-unit><column-unit slot="1" span="1"></column-unit><column-unit class="project-card" slot="2" span="4" style="margin-top:5rem">
+      <a href="threads-of-go-vap-1" rel="history"><media-item autoplay="true" disable-zoom="true" hash="B2451641621752563002506238773168" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Threads of Go Vap</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Interactive Typography · 2024</span></div></a>
+    </column-unit><column-unit slot="3" span="2"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit slot="0" span="1"></column-unit><column-unit class="project-card" slot="1" span="4" style="margin-top:3rem">
+      <div class="project-card-static"><media-item autoplay="true" disable-zoom="true" hash="W2447769952384499527205624498096" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Chi Le</span></div><span class="project-card__detail">Illustration · 2022</span></div></div>
+    </column-unit><column-unit slot="2" span="1"></column-unit><column-unit class="project-card" slot="3" span="5">
+      <a href="hear-the-wind-sings-1" rel="history"><media-item autoplay="true" disable-zoom="true" hash="X2442264095219211647729543694256" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Hear The Wind Sing</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Typographic Book Cover · 2024</span></div></a>
+    </column-unit><column-unit slot="4" span="1"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="4"><div class="project-card__inner"><media-item autoplay="true" disable-zoom="true" hash="U2908372589155804000788626556848" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">The Dream Is A Snail</span></div><span class="project-card__detail">Short Film Poster · 2026</span></div></div></column-unit><column-unit slot="1" span="1"></column-unit><column-unit slot="2" span="1"></column-unit><column-unit class="project-card" slot="3" span="6" style="margin-top:5rem"><div class="project-card__inner"><media-item autoplay="true" disable-zoom="true" hash="C2910017908880547357951239931824" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Chronotope Exhibition</span></div><span class="project-card__detail">Exhibition Poster · 2026</span></div></div></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit slot="0" span="4"></column-unit><column-unit class="project-card" slot="1" span="4"><div class="project-card__inner"><media-item autoplay="true" disable-zoom="true" hash="W2440626236501469831279596029872" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Hoe DJ Party</span></div><span class="project-card__detail">Flash Event Poster · 2024</span></div></div></column-unit><column-unit slot="2" span="4"></column-unit></column-set>
+  </section>
+
+  <section class="portfolio-section">
+    <column-set class="portfolio-section__head" gutter="1rem" mobile-stack="false"><column-unit slot="0" span="10"><div class="portfolio-section__title">Commercial Production &amp; Music Video</div></column-unit><column-unit slot="1" span="2"><div class="portfolio-section__number">03 / 16</div></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit slot="0" span="2"></column-unit><column-unit class="project-card" slot="1" span="8">
+      <a href="em-muon-duoc-bay-(vstra)" rel="history"><media-item allow="autoplay; fullscreen" allowfullscreen="" autoplay="true" class="zoomable" frameborder="0" height="300" src="https://www.youtube.com/embed/MWJURU9MS8c?si=35KlVpKiKClZ4tKy&amp;autoplay=1&amp;mute=1&amp;loop=1&amp;playsinline=1" width="400"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Em Muon Duoc Bay — Vstra</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Music Video · 3D Concept Modelling Artist · 2026</span></div></a>
+    </column-unit><column-unit slot="2" span="2"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="5"><a href="sau-con-suy-(rhyder)" rel="history"><media-item autoplay="true" disable-zoom="true" hash="D2906748879883976714734279083952" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Sau Con Suy — Rhyder</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Music Video · 3D Concept Modelling Artist · 2025</span></div></a></column-unit><column-unit slot="1" span="1"></column-unit><column-unit class="project-card" slot="2" span="5" style="margin-top:6rem"><a href="doiii-(hau-hoang)" rel="history"><media-item autoplay="true" disable-zoom="true" hash="H2506365324181588757884824733616" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Doiii — Hau Hoang</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Music Video · Director's Assistant &amp; Lead Graphic Designer · 2025</span></div></a></column-unit><column-unit slot="3" span="1"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit slot="0" span="2"></column-unit><column-unit class="project-card" slot="1" span="8"><a href="cocoon-nuoc-tay-trang-sen" rel="history"><media-item autoplay="true" disable-zoom="true" hash="L2906504577348230281977957468080" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Cocoon — Nuoc Tay Trang Sen Hau Giang</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Director's Assistant · 2025</span></div></a></column-unit><column-unit slot="2" span="2"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="4" style="margin-top:5rem"><a href="simple-facial-cleanser" rel="history"><media-item autoplay="true" disable-zoom="true" hash="E2908380802771517004777288648624" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Simple Facial Cleanser</span><span class="project-card__action">View →</span></div><span class="project-card__detail">TVC · Director's Assistant · 2025</span></div></a></column-unit><column-unit slot="1" span="1"></column-unit><column-unit class="project-card" slot="2" span="7"><a href="cocoon-healing" rel="history"><media-item autoplay="true" disable-zoom="true" hash="H2908333780914068474707646367664" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Cocoon Finding The Healing</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Art Director · 2025</span></div></a></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="6"><a href="gillette-vector-3" rel="history"><media-item autoplay="true" disable-zoom="true" hash="K2908344193529249017464537499568" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Gillette Vector 3</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Director's Assistant · 2025</span></div></a></column-unit><column-unit slot="1" span="2"></column-unit><column-unit class="project-card" slot="2" span="4" style="margin-top:4rem"><a href="vinamilk-sua-hat" rel="history"><media-item autoplay="true" disable-zoom="true" hash="N2908353024059424078521734285232" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Vinamilk Sua Hat</span><span class="project-card__action">View →</span></div><span class="project-card__detail">TVC · Director's Assistant · 2025</span></div></a></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="5" style="margin-top:3rem"><a href="fc-online-prime-cong-phuong" rel="history"><media-item autoplay="true" disable-zoom="true" hash="P2908332259445064019217538631600" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">FC Online | Prime Cong Phuong</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Director's Assistant · 2025</span></div></a></column-unit><column-unit slot="1" span="2"></column-unit><column-unit class="project-card" slot="2" span="4"><a href="ponnie-meat-snack-x-son-tung-mtp" rel="history"><media-item autoplay="true" disable-zoom="true" hash="O2448559814719894773336813881264" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Ponnie Meat Snack × Son Tung M-TP</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Director's Assistant · 2025</span></div></a></column-unit><column-unit slot="3" span="1"></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit slot="0" span="1"></column-unit><column-unit class="project-card" slot="1" span="6"><a href="vietjet-airlines" rel="history"><media-item autoplay="true" disable-zoom="true" hash="F2448721413584429738532159113136" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Vietjet Air — Enjoy Flying!</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Post Producer · 2025</span></div></a></column-unit><column-unit slot="2" span="1"></column-unit><column-unit class="project-card" slot="3" span="4" style="margin-top:5rem"><a href="tiktokshop-3-3" rel="history"><media-item autoplay="true" disable-zoom="true" hash="W2448720077007141133832887224240" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">TikTok Shop 3.3</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Post Producer · 2025</span></div></a></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="5" style="margin-top:4rem"><a href="tiktok-awards-2024" rel="history"><media-item autoplay="true" disable-zoom="true" hash="R2448727623791502617294967949232" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">TikTok Awards 2024</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Post Producer · 2024</span></div></a></column-unit><column-unit slot="1" span="2"></column-unit><column-unit class="project-card" slot="2" span="5"><a href="tiktokshop-9-9" rel="history"><media-item autoplay="true" disable-zoom="true" hash="G2448727208536846774019251521456" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">TikTok Shop 9.9</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Commercial · Post Producer · 2024</span></div></a></column-unit></column-set>
+
+    <column-set class="project-row" gutter="2rem"><column-unit class="project-card" slot="0" span="4"><a href="pantenexatus" rel="history"><media-item autoplay="true" disable-zoom="true" hash="L2908361970342918202106367461296" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">Pantene × Anh Tu Atus</span><span class="project-card__action">View →</span></div><span class="project-card__detail">Social Campaign · Creative · 2025</span></div></a></column-unit><column-unit slot="1" span="4"></column-unit><column-unit class="project-card" slot="2" span="4"><a href="the5way-phu-quoc" rel="history"><media-item autoplay="true" disable-zoom="true" hash="G2908364459970838622168582211504" loop="true" muted="true" playsinline="true"></media-item><div class="project-card__meta"><div class="project-card__topline"><span class="project-card__title">The 5 Way Vinhomes Phu Quoc</span><span class="project-card__action">View →</span></div><span class="project-card__detail">TVC · Creative · 2023</span></div></a></column-unit></column-set>
+  </section>
+</div>
+
+<footer id="S0415376174" class="page mobile-work-footer" aria-label="Mobile page footer">
+  <div class="page-layout">
+    <div class="page-content">
+      <column-set gutter="1" mobile-stack="false">
+        <column-unit slot="0" span="7">
+          <a href="#top" rel="top"><text-icon icon="upwards-arrow"></text-icon>TOP</a>
+        </column-unit>
+        <column-unit slot="1" span="5">
+          <div style="text-align: right"><a href="#top" rel="home-page">INDEX</a></div>
+        </column-unit>
+      </column-set>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (() => {
+    const root = document.querySelector('.portfolio-index');
+    if (!root) return;
+
+    const revealItems = root.querySelectorAll('.project-card');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      revealItems.forEach((item) => item.classList.add('is-visible'));
+      return;
+    }
+
+    revealItems.forEach((item) => item.classList.add('portfolio-reveal'));
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const videos = entry.target.querySelectorAll('video');
+
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          videos.forEach((video) => video.play().catch(() => {}));
+        } else {
+          videos.forEach((video) => video.pause());
+        }
+      });
+    }, { rootMargin: '80px 0px', threshold: 0.08 });
+
+    revealItems.forEach((item) => observer.observe(item));
+  })();
+</script>

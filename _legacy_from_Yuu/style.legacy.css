@@ -1,0 +1,581 @@
+@font-face {
+  font-family: "Cirrus Cumulus";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://freight.cargo.site/m/K2909772978749674049448553236400/CirrusCumulus.woff") format("woff");
+}
+
+@font-face {
+  font-family: "A B C Connect Unlicensed Trial";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://freight.cargo.site/m/L2908301271368437148974194116528/ABCConnect-Flat-Trial.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "A B C Connect Unlicensed Trial";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://freight.cargo.site/m/O2908301329604808189675248568240/ABCConnect-FlatItalic-Trial.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Diatype Variable";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://freight.cargo.site/m/K2904411546437954791206715410352/ABCDiatypeVariable-Trial.woff2") format("woff2");
+}
+
+:root {
+    --portfolio-ink: #000;
+    --portfolio-muted: rgba(0, 0, 0, 0.42);
+    --portfolio-line: rgba(0, 0, 0, 0.14);
+    --portfolio-gap: 2rem;
+    --portfolio-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  html {
+    min-width: 320px;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    color: var(--portfolio-ink);
+    background: #fff;
+  }
+
+  /* Cargo column-set fallback for the local VS Code preview */
+  column-set {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem;
+    width: 100%;
+  }
+
+  column-set[gutter="1rem"] { gap: 1rem; }
+  column-set[gutter="2rem"] { gap: 2rem; }
+
+  column-unit {
+    display: block;
+    min-width: 0;
+  }
+
+  column-unit[span="1"]  { grid-column: span 1; }
+  column-unit[span="2"]  { grid-column: span 2; }
+  column-unit[span="3"]  { grid-column: span 3; }
+  column-unit[span="4"]  { grid-column: span 4; }
+  column-unit[span="5"]  { grid-column: span 5; }
+  column-unit[span="6"]  { grid-column: span 6; }
+  column-unit[span="7"]  { grid-column: span 7; }
+  column-unit[span="8"]  { grid-column: span 8; }
+  column-unit[span="9"]  { grid-column: span 9; }
+  column-unit[span="10"] { grid-column: span 10; }
+  column-unit[span="11"] { grid-column: span 11; }
+  column-unit[span="12"] { grid-column: span 12; }
+
+  media-item,
+  gallery-slideshow,
+  digital-clock {
+    display: block;
+  }
+
+  /* PAGE LAYOUT / Cargo page R1116398685 */
+  [id="R1116398685"].page {
+    justify-content: flex-end;
+    min-height: auto;
+  }
+
+  [id="R1116398685"] .page-layout {
+    width: 100%;
+    max-width: 66%;
+    align-items: flex-start;
+  }
+
+  [id="R1116398685"] .page-content {
+    max-width: none;
+    padding: 1rem;
+    border: 0 solid rgba(0, 0, 0, 0.15);
+    text-align: left;
+  }
+
+  /* Two-column fallback: also works when this file is opened outside Cargo */
+  .portfolio-index {
+    width: 66%;
+    margin-left: 34%;
+    padding: 1rem;
+    font-family: "A B C Connect Unlicensed Trial", Arial, sans-serif;
+  }
+
+  [id="R1116398685"] .portfolio-index {
+    width: 100%;
+    margin-left: 0;
+    padding: 0;
+  }
+
+  /* FIXED LEFT NAV */
+  .portfolio-sidebar {
+    position: fixed;
+    z-index: 20;
+    top: 1rem;
+    bottom: 1rem;
+    left: clamp(1rem, 3.25vw, 4.25rem);
+    width: clamp(19rem, 27vw, 34rem);
+    padding-right: clamp(1rem, 2vw, 2.5rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: var(--portfolio-ink);
+    text-align: left;
+    scrollbar-width: none;
+    overscroll-behavior: contain;
+  }
+
+  .portfolio-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .portfolio-sidebar a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .portfolio-sidebar a:hover,
+  .portfolio-sidebar a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+
+  .portfolio-sidebar a:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 0.2rem;
+  }
+
+  .portfolio-sidebar__logo {
+    margin: 0 0 2rem;
+    color: #0021ff;
+    font-size: clamp(3rem, 4vw, 5.2rem);
+    font-weight: 400;
+    line-height: 0.72;
+    letter-spacing: -0.055em;
+  }
+
+  .portfolio-sidebar__bio {
+    max-width: 31rem;
+    margin: 0;
+    color: var(--portfolio-muted);
+    font-size: 0.98rem;
+    line-height: 1.22;
+  }
+
+  .portfolio-sidebar__name,
+  .portfolio-sidebar__links,
+  .portfolio-sidebar__work-label {
+    color: #0021ff;
+  }
+
+  .portfolio-sidebar__name {
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+
+  .portfolio-sidebar__links {
+    margin-top: 2.4rem;
+    line-height: 1.12;
+  }
+
+  .portfolio-sidebar__work-label {
+    display: block;
+    margin-top: 1.4rem;
+  }
+
+  .portfolio-sidebar__categories {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.7rem 2rem;
+    margin-top: 2rem;
+    padding-bottom: 1rem;
+    font-size: 0.93rem;
+    line-height: 1.18;
+  }
+
+  .portfolio-sidebar__group {
+    min-width: 0;
+  }
+
+  .portfolio-sidebar__group-title {
+    margin: 0 0 0.25rem;
+    font-weight: 700;
+  }
+
+  .portfolio-sidebar__items {
+    margin: 0;
+    padding-left: 2.15rem;
+  }
+
+  .portfolio-sidebar__items li {
+    padding-left: 0.15rem;
+  }
+
+  .portfolio-index,
+  .portfolio-index * {
+    box-sizing: border-box;
+  }
+
+  .portfolio-intro {
+    align-items: start;
+    margin: 1rem 0 7rem;
+  }
+
+  .portfolio-kicker,
+  .portfolio-section__number,
+  .portfolio-clock,
+  .project-card__action {
+    font-size: 0.82rem;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .portfolio-intro__title {
+    display: block;
+    max-width: 17ch;
+    margin-top: 0.55rem;
+    font-size: clamp(2.4rem, 5.5vw, 6.8rem);
+    font-weight: 700;
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+  }
+
+  .portfolio-intro__note {
+    max-width: 34rem;
+    margin: 1rem 0 0;
+    color: var(--portfolio-muted);
+    line-height: 1.35;
+  }
+
+  .portfolio-clock {
+    color: var(--portfolio-muted);
+    text-align: right;
+  }
+
+  .portfolio-section {
+    margin-top: 10rem;
+  }
+
+  .portfolio-section:first-of-type {
+    margin-top: 0;
+  }
+
+  .portfolio-section__head {
+    align-items: baseline;
+    padding-bottom: 0.7rem;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--portfolio-line);
+  }
+
+  .portfolio-section__title {
+    font-size: clamp(1.35rem, 2.2vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  .portfolio-section__number {
+    color: var(--portfolio-muted);
+    text-align: right;
+  }
+
+  .project-row {
+    align-items: flex-start;
+    margin-bottom: 7rem;
+  }
+
+  .project-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .project-card {
+    min-width: 0;
+  }
+
+  .project-offset-2 { margin-top: 2rem; }
+  .project-offset-3 { margin-top: 3rem; }
+  .project-offset-4 { margin-top: 4rem; }
+  .project-offset-5 { margin-top: 5rem; }
+  .project-offset-6 { margin-top: 6rem; }
+  .project-offset-7 { margin-top: 7rem; }
+
+  .project-card > a,
+  .project-card > .project-card__inner {
+    display: block !important;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .project-card media-item,
+  .project-card gallery-slideshow {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    background: transparent !important;
+  }
+
+  .project-card > a media-item,
+  .project-card > a gallery-slideshow {
+    pointer-events: none !important;
+  }
+
+  .project-card__meta {
+    margin-top: 0.85rem;
+  }
+
+  .project-card__topline {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid transparent;
+    transition: border-color 220ms ease;
+  }
+
+  .project-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .project-card__action {
+    flex: 0 0 auto;
+    transition: transform 220ms var(--portfolio-ease);
+  }
+
+  .project-card__detail {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--portfolio-muted);
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .project-card > a:hover .project-card__topline,
+  .project-card > a:focus-visible .project-card__topline {
+    border-color: var(--portfolio-ink);
+  }
+
+  .project-card > a:hover .project-card__action,
+  .project-card > a:focus-visible .project-card__action {
+    transform: translateX(0.3rem);
+  }
+
+  .project-card > a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 0.35rem;
+  }
+
+  .portfolio-reveal {
+    opacity: 0;
+    transform: translateY(2rem);
+    transition: opacity 750ms var(--portfolio-ease), transform 750ms var(--portfolio-ease);
+    will-change: opacity, transform;
+  }
+
+  .portfolio-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    [id="R1116398685"].page {
+      display: block;
+    }
+
+    [id="R1116398685"] .page-layout {
+      max-width: 100%;
+    }
+
+    [id="R1116398685"] .page-content {
+      width: 100%;
+      padding: 1rem;
+    }
+
+    .portfolio-sidebar {
+      position: relative;
+      inset: auto;
+      width: 100%;
+      height: auto;
+      padding: 0 0 4rem;
+      overflow: visible;
+    }
+
+    .portfolio-sidebar__logo {
+      font-size: clamp(3.2rem, 18vw, 5rem);
+    }
+
+    .portfolio-sidebar__bio {
+      max-width: 38rem;
+    }
+
+    .portfolio-sidebar__categories {
+      gap: 2.25rem 1.25rem;
+    }
+
+    .portfolio-index,
+    [id="R1116398685"] .portfolio-index {
+      width: 100%;
+      margin-left: 0;
+      padding: 0;
+    }
+
+    .portfolio-intro {
+      margin-bottom: 5rem;
+    }
+
+    .portfolio-intro__title {
+      max-width: 10ch;
+      font-size: clamp(3rem, 15vw, 5.5rem);
+    }
+
+    .portfolio-intro column-unit:first-child {
+      width: 78% !important;
+      flex: 0 0 78% !important;
+      max-width: 78% !important;
+    }
+
+    .portfolio-intro column-unit:last-child {
+      width: 22% !important;
+      flex: 0 0 22% !important;
+      max-width: 22% !important;
+    }
+
+    .portfolio-intro__note {
+      max-width: 90%;
+    }
+
+    .portfolio-section {
+      margin-top: 7rem;
+    }
+
+    .portfolio-section__head {
+      margin-bottom: 2rem;
+    }
+
+    .project-row {
+      display: block;
+      margin-bottom: 0 !important;
+    }
+
+    .project-row column-unit {
+      width: 100% !important;
+      flex: 0 0 100% !important;
+      max-width: 100% !important;
+      margin-top: 0 !important;
+      margin-bottom: 3.75rem !important;
+    }
+
+    .project-row column-unit:empty {
+      display: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portfolio-reveal,
+    .project-card__action {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+
+/* =========================================================
+   CARGO TEXT STYLES
+   ========================================================= */
+
+/* Bodycopy — Social Condensed */
+body,
+bodycopy,
+.text-bodycopy,
+.portfolio-sidebar__bio,
+.portfolio-sidebar__categories,
+.portfolio-intro__note {
+  font-family: "Social Condensed Variable", "Arial Narrow", Arial, sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-variation-settings: "wdth" 75, "slnt" 0;
+}
+
+/* Heading 1 — ABC Connect */
+h1,
+.heading-1,
+.portfolio-intro__title {
+  font-family: "A B C Connect Unlicensed Trial", Arial, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+}
+
+/* Heading 2 — Cirrus Cumulus */
+h2,
+.heading-2,
+.portfolio-sidebar__logo {
+  font-family: "Cirrus Cumulus", Georgia, serif;
+  font-style: normal;
+  font-weight: 400;
+}
+
+/* Caption — Social */
+.caption,
+.text-caption,
+.project-card__detail {
+  font-family: "Social Variable", Arial, sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-variation-settings: "wdth" 100, "slnt" 0;
+}
+
+/* Bodycopy Serif — Cirrus Cumulus */
+.bodycopy-serif,
+.text-bodycopy-serif,
+.portfolio-sidebar__name,
+.portfolio-sidebar__links,
+.portfolio-sidebar__work-label {
+  font-family: "Cirrus Cumulus", Georgia, serif;
+  font-style: normal;
+  font-weight: 400;
+}
+
+/* Header — Diatype */
+.header,
+.text-header,
+.portfolio-section__title,
+.portfolio-sidebar__group-title {
+  font-family: "Diatype Variable", Arial, sans-serif;
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* Caption Title — Diatype */
+.caption-title,
+.text-caption-title,
+.project-card__title {
+  font-family: "Diatype Variable", Arial, sans-serif;
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* Tag — Social Condensed */
+.tag,
+.text-tag,
+.portfolio-kicker,
+.portfolio-section__number,
+.portfolio-clock,
+.project-card__action {
+  font-family: "Social Condensed Variable", "Arial Narrow", Arial, sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-variation-settings: "wdth" 75, "slnt" 0;
+}
