@@ -24,8 +24,35 @@
   text-decoration: none;
 }
 
-.cargo-work-template img {
+.cargo-work-template img,
+.portfolio-index .masonry-row img,
+.portfolio-index .homepage-horizontal-gallery img {
   cursor: zoom-in;
+}
+
+.artwork-zoom-target:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 0.2rem;
+}
+
+.portfolio-index .masonry-row a media-item.artwork-interactive-media,
+.portfolio-index .masonry-row a media-item.artwork-interactive-media img {
+  pointer-events: auto !important;
+}
+
+.artwork-detail-tooltip {
+  position: fixed;
+  z-index: 999;
+  width: max-content;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 0.45rem 0.6rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.88);
+  pointer-events: none;
+}
+
+.artwork-detail-tooltip[hidden] {
+  display: none;
 }
 
 .has-image-zoom-open {

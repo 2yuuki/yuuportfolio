@@ -283,6 +283,9 @@ def build() -> None:
     stylesheet_version = hashlib.sha256(
         (ROOT / "style.css").read_bytes()
     ).hexdigest()[:12]
+    image_zoom_version = hashlib.sha256(
+        (ROOT / "image-zoom.js").read_bytes()
+    ).hexdigest()[:12]
 
     for source in ROOT.rglob("*"):
         if not source.is_file() or is_excluded(source):
@@ -303,6 +306,16 @@ def build() -> None:
                 r'(?:\?[^"\']*)?(?P<quote>["\'])',
                 (
                     rf'\g<prefix>?v={stylesheet_version}'
+                    rf'\g<quote>'
+                ),
+                text,
+                flags=re.IGNORECASE,
+            )
+            text = re.sub(
+                r'(?P<prefix>\bsrc=["\'][^"\']*image-zoom\.js)'
+                r'(?:\?[^"\']*)?(?P<quote>["\'])',
+                (
+                    rf'\g<prefix>?v={image_zoom_version}'
                     rf'\g<quote>'
                 ),
                 text,
