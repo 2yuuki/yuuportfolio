@@ -1908,6 +1908,12 @@ video.local-project-media.is-portrait-video {
   background: #fff;
 }
 
+.cargo-work-template .memory-output-slider__caption {
+  width: 78%;
+  max-width: 52rem;
+  margin: 0.75rem auto 0;
+}
+
 .memory-output-slider__button {
   position: absolute;
   z-index: 2;
@@ -1959,6 +1965,11 @@ video.local-project-media.is-portrait-video {
   }
 
   .memory-output-slider--compact {
+    width: 100%;
+    max-width: none;
+  }
+
+  .cargo-work-template .memory-output-slider__caption {
     width: 100%;
     max-width: none;
   }
