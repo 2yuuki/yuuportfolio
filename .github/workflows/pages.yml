@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      SITE_OUTPUT: ${{ runner.temp }}/yuuportfolio-site
+      SITE_OUTPUT: /tmp/yuuportfolio-site
     steps:
       - name: Check out website
         uses: actions/checkout@v4
