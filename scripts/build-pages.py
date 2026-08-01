@@ -24,13 +24,6 @@ MEDIA_UPSTREAM_BASE = (
     "2yuuki/yuuportfolio/main/"
 )
 BUNDLED_VIDEO_MAX_BYTES = 50 * 1024 * 1024
-FORCE_BUNDLED_MEDIA = {
-    "works/personal works/Threads of Go Vap/Performance/Record 2.mov",
-    (
-        "works/personal works/When The Clock Chimes/"
-        "COMM2752-2024-S3-A3W12-WhenTheClockChimes-Animation.mp4"
-    ),
-}
 MEDIA_EXTENSIONS = {
     ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".mov", ".pdf", ".docx"
 }
@@ -39,6 +32,7 @@ REFERENCE_PATTERN = re.compile(
     r"(?P<attr>\b(?:src|href|poster))=(?P<quote>[\"'])(?P<value>[^\"']+)(?P=quote)",
     re.IGNORECASE,
 )
+IFRAME_TAG_PATTERN = re.compile(r"<iframe\b[^>]*>", re.IGNORECASE)
 TRANSPARENT_IMAGE = (
     "data:image/gif;base64,"
     "R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
@@ -126,14 +120,25 @@ def media_file_size(path: Path) -> int:
 def should_bundle_media(path: Path) -> bool:
     if path.suffix.lower() not in {".mp4", ".mov"}:
         return False
-    try:
-        repository_path = repository_path_for(path.relative_to(ROOT))
-    except ValueError:
-        repository_path = ""
-    return (
-        repository_path in FORCE_BUNDLED_MEDIA or
-        media_file_size(path) <= BUNDLED_VIDEO_MAX_BYTES
+    return media_file_size(path) <= BUNDLED_VIDEO_MAX_BYTES
+
+
+def defer_external_iframe(match: re.Match) -> str:
+    tag = match.group(0)
+    source_match = re.search(
+        r'\bsrc=(?P<quote>["\'])(?P<value>https?://[^"\']+)(?P=quote)',
+        tag,
+        flags=re.IGNORECASE,
     )
+    if not source_match:
+        return tag
+    quote_char = source_match.group("quote")
+    value = source_match.group("value")
+    deferred = (
+        f'src={quote_char}about:blank{quote_char} '
+        f'data-embed-src={quote_char}{value}{quote_char}'
+    )
+    return tag[:source_match.start()] + deferred + tag[source_match.end():]
 
 
 def bundle_media(source: Path, destination: Path) -> None:
@@ -341,6 +346,36 @@ self.addEventListener("fetch", (event) => {{
 
 def media_loader_source() -> str:
     return """(() => {
+  const setFramePlayback = (frame, active) => {
+    if (!frame.contentWindow) return;
+    const source = frame.dataset.loadedEmbedSrc || "";
+    if (source.includes("vimeo.com")) {
+      frame.contentWindow.postMessage(
+        { method: active ? "play" : "pause" },
+        "*"
+      );
+    } else if (source.includes("youtube.com") || source.includes("youtube-nocookie.com")) {
+      frame.contentWindow.postMessage(JSON.stringify({
+        event: "command",
+        func: active ? "playVideo" : "pauseVideo",
+        args: [],
+      }), "*");
+    }
+  };
+
+  const setPlayback = (element, active) => {
+    element.dataset.mediaVisible = active ? "true" : "false";
+    if (element.tagName === "VIDEO") {
+      if (active && element.dataset.autoplay === "true") {
+        element.play().catch(() => {});
+      } else if (!active) {
+        element.pause();
+      }
+    } else if (element.tagName === "IFRAME") {
+      setFramePlayback(element, active);
+    }
+  };
+
   const loadElement = (element) => {
     if (element.dataset.mediaSrc) {
       element.src = element.dataset.mediaSrc;
@@ -348,7 +383,7 @@ def media_loader_source() -> str:
       if (element.tagName === "VIDEO") {
         element.preload = "none";
         element.load();
-        if (element.dataset.autoplay === "true") {
+        if (element.dataset.mediaVisible === "true" && element.dataset.autoplay === "true") {
           element.play().catch(() => {});
         }
       }
@@ -357,11 +392,25 @@ def media_loader_source() -> str:
       element.poster = element.dataset.mediaPoster;
       element.removeAttribute("data-media-poster");
     }
+    if (element.dataset.embedSrc) {
+      let source = element.dataset.embedSrc;
+      if (source.includes("youtube.com") || source.includes("youtube-nocookie.com")) {
+        const url = new URL(source);
+        url.searchParams.set("enablejsapi", "1");
+        source = url.toString();
+      }
+      element.dataset.loadedEmbedSrc = source;
+      element.addEventListener("load", () => {
+        setFramePlayback(element, element.dataset.mediaVisible === "true");
+      }, { once: true });
+      element.src = source;
+      element.removeAttribute("data-embed-src");
+    }
   };
 
   const observeMedia = () => {
     const media = Array.from(document.querySelectorAll(
-      "[data-media-src], [data-media-poster]"
+      "[data-media-src], [data-media-poster], [data-embed-src]"
     ));
     if (!media.length) return;
 
@@ -369,6 +418,15 @@ def media_loader_source() -> str:
       media.forEach(loadElement);
       return;
     }
+
+    const playbackObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setPlayback(entry.target, entry.isIntersecting && entry.intersectionRatio >= 0.15);
+        });
+      },
+      { rootMargin: "0px", threshold: [0, 0.15] }
+    );
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -378,9 +436,14 @@ def media_loader_source() -> str:
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "300px 0px", threshold: 0.01 }
+      { rootMargin: "120px 0px", threshold: 0.01 }
     );
-    media.forEach((element) => observer.observe(element));
+    media.forEach((element) => {
+      observer.observe(element);
+      if (element.tagName === "VIDEO" || element.tagName === "IFRAME") {
+        playbackObserver.observe(element);
+      }
+    });
   };
 
   observeMedia();
@@ -459,6 +522,7 @@ def build() -> None:
                 lambda match: rewrite_match(source, match),
                 text,
             )
+            text = IFRAME_TAG_PATTERN.sub(defer_external_iframe, text)
             loader_tag = (
                 (
                     f'<script src="{SITE_BASE}media-loader.js'
