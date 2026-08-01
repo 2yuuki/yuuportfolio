@@ -24,6 +24,13 @@ MEDIA_UPSTREAM_BASE = (
     "2yuuki/yuuportfolio/main/"
 )
 BUNDLED_VIDEO_MAX_BYTES = 50 * 1024 * 1024
+FORCE_BUNDLED_MEDIA = {
+    "works/personal works/Threads of Go Vap/Performance/Record 2.mov",
+    (
+        "works/personal works/When The Clock Chimes/"
+        "COMM2752-2024-S3-A3W12-WhenTheClockChimes-Animation.mp4"
+    ),
+}
 MEDIA_EXTENSIONS = {
     ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".mov", ".pdf", ".docx"
 }
@@ -117,8 +124,14 @@ def media_file_size(path: Path) -> int:
 
 
 def should_bundle_media(path: Path) -> bool:
+    if path.suffix.lower() not in {".mp4", ".mov"}:
+        return False
+    try:
+        repository_path = repository_path_for(path.relative_to(ROOT))
+    except ValueError:
+        repository_path = ""
     return (
-        path.suffix.lower() in {".mp4", ".mov"} and
+        repository_path in FORCE_BUNDLED_MEDIA or
         media_file_size(path) <= BUNDLED_VIDEO_MAX_BYTES
     )
 
