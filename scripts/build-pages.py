@@ -4,7 +4,10 @@ import hashlib
 import os
 import re
 import shutil
+import subprocess
 import tempfile
+import unicodedata
+from typing import Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = Path(
@@ -16,6 +19,11 @@ OUTPUT = Path(
 FAVICON = ROOT / "favicon.png"
 SITE_BASE = "/yuuportfolio/"
 MEDIA_ROUTE = SITE_BASE + "__media__/"
+MEDIA_UPSTREAM_BASE = (
+    "https://media.githubusercontent.com/media/"
+    "2yuuki/yuuportfolio/main/"
+)
+BUNDLED_VIDEO_MAX_BYTES = 50 * 1024 * 1024
 MEDIA_EXTENSIONS = {
     ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".mov", ".pdf", ".docx"
 }
@@ -41,8 +49,115 @@ MEDIA_TYPES = {
 }
 
 
+def tracked_repository_paths() -> set[str]:
+    try:
+        output = subprocess.check_output(
+            ["git", "ls-files", "-z"],
+            cwd=ROOT,
+        ).decode("utf-8")
+    except (OSError, subprocess.CalledProcessError, UnicodeDecodeError):
+        return set()
+    return {path for path in output.split("\0") if path}
+
+
+TRACKED_PATHS = tracked_repository_paths()
+TRACKED_PATHS_BY_NFC: dict[str, list[str]] = {}
+for tracked_path in TRACKED_PATHS:
+    TRACKED_PATHS_BY_NFC.setdefault(
+        unicodedata.normalize("NFC", tracked_path),
+        [],
+    ).append(tracked_path)
+
+
 def is_excluded(path: Path) -> bool:
     return any(part in EXCLUDED_PARTS for part in path.relative_to(ROOT).parts)
+
+
+def resolve_local_reference(html_file: Path, path_value: str) -> Path:
+    decoded = unquote(path_value)
+    candidates = [
+        decoded,
+        unicodedata.normalize("NFD", decoded),
+        unicodedata.normalize("NFC", decoded),
+    ]
+    for candidate in dict.fromkeys(candidates):
+        resolved = (html_file.parent / candidate).resolve()
+        if resolved.exists():
+            return resolved
+    return (html_file.parent / decoded).resolve()
+
+
+def repository_path_for(relative: Path) -> str:
+    local_path = relative.as_posix()
+    if local_path in TRACKED_PATHS:
+        return local_path
+
+    normalized_path = unicodedata.normalize("NFC", local_path)
+    matches = TRACKED_PATHS_BY_NFC.get(normalized_path, [])
+    if matches:
+        return matches[0]
+    return normalized_path
+
+
+def lfs_pointer_size(path: Path) -> Optional[int]:
+    try:
+        with path.open("rb") as source:
+            header = source.read(256)
+    except OSError:
+        return None
+    if not header.startswith(b"version https://git-lfs.github.com/spec/v1"):
+        return None
+    match = re.search(rb"(?:^|\n)size (\d+)(?:\n|$)", header)
+    return int(match.group(1)) if match else None
+
+
+def media_file_size(path: Path) -> int:
+    pointer_size = lfs_pointer_size(path)
+    return pointer_size if pointer_size is not None else path.stat().st_size
+
+
+def should_bundle_media(path: Path) -> bool:
+    return (
+        path.suffix.lower() in {".mp4", ".mov"} and
+        media_file_size(path) <= BUNDLED_VIDEO_MAX_BYTES
+    )
+
+
+def bundle_media(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if lfs_pointer_size(source) is None:
+        shutil.copy2(source, destination)
+        return
+
+    pointer = source.read_bytes()
+    relative = source.relative_to(ROOT).as_posix()
+    with destination.open("wb") as output:
+        subprocess.run(
+            ["git", "lfs", "smudge", relative],
+            cwd=ROOT,
+            input=pointer,
+            stdout=output,
+            check=True,
+        )
+
+
+def referenced_bundled_media() -> set[str]:
+    referenced = set()
+    for html_file in ROOT.rglob("*.html"):
+        if is_excluded(html_file):
+            continue
+        text = html_file.read_text(encoding="utf-8")
+        for match in REFERENCE_PATTERN.finditer(text):
+            value = match.group("value")
+            if value.startswith((
+                "http://", "https://", "//", "#", "mailto:", "javascript:"
+            )):
+                continue
+            path_value = value.split("#", 1)[0].split("?", 1)[0]
+            resolved = resolve_local_reference(html_file, path_value)
+            if resolved.exists() and should_bundle_media(resolved):
+                referenced.add(repository_path_for(resolved.relative_to(ROOT)))
+    return referenced
 
 
 def rewrite_reference(html_file: Path, value: str) -> str:
@@ -50,7 +165,8 @@ def rewrite_reference(html_file: Path, value: str) -> str:
         return value
 
     path_value = value.split("#", 1)[0].split("?", 1)[0]
-    resolved = (html_file.parent / unquote(path_value)).resolve()
+    suffix = value[len(path_value):]
+    resolved = resolve_local_reference(html_file, path_value)
 
     try:
         relative = resolved.relative_to(ROOT)
@@ -60,7 +176,18 @@ def rewrite_reference(html_file: Path, value: str) -> str:
     if resolved.suffix.lower() not in MEDIA_EXTENSIONS:
         return value
 
-    return MEDIA_ROUTE + quote(relative.as_posix(), safe="/()")
+    repository_path = repository_path_for(relative)
+    if should_bundle_media(resolved):
+        return (
+            SITE_BASE +
+            quote(repository_path, safe="/()") +
+            suffix
+        )
+    return (
+        MEDIA_UPSTREAM_BASE +
+        quote(repository_path, safe="/()") +
+        suffix
+    )
 
 
 def rewrite_match(html_file: Path, match: re.Match) -> str:
@@ -73,9 +200,10 @@ def rewrite_match(html_file: Path, match: re.Match) -> str:
         return match.group(0)
 
     if attr == "src":
-        resolved = (html_file.parent / unquote(
-            original.split("#", 1)[0].split("?", 1)[0]
-        )).resolve()
+        resolved = resolve_local_reference(
+            html_file,
+            original.split("#", 1)[0].split("?", 1)[0],
+        )
         placeholder = TRANSPARENT_IMAGE if resolved.suffix.lower() in {
             ".png", ".jpg", ".jpeg", ".gif"
         } else ""
@@ -199,71 +327,51 @@ self.addEventListener("fetch", (event) => {{
 
 
 def media_loader_source() -> str:
-    return f"""(() => {{
-  const loadElement = (element) => {{
-    if (element.dataset.mediaSrc) {{
+    return """(() => {
+  const loadElement = (element) => {
+    if (element.dataset.mediaSrc) {
       element.src = element.dataset.mediaSrc;
       element.removeAttribute("data-media-src");
-      if (element.tagName === "VIDEO") {{
+      if (element.tagName === "VIDEO") {
         element.preload = "none";
         element.load();
-        if (element.dataset.autoplay === "true") {{
-          element.play().catch(() => {{}});
-        }}
-      }}
-    }}
-    if (element.dataset.mediaPoster) {{
+        if (element.dataset.autoplay === "true") {
+          element.play().catch(() => {});
+        }
+      }
+    }
+    if (element.dataset.mediaPoster) {
       element.poster = element.dataset.mediaPoster;
       element.removeAttribute("data-media-poster");
-    }}
-  }};
+    }
+  };
 
-  const observeMedia = () => {{
+  const observeMedia = () => {
     const media = Array.from(document.querySelectorAll(
       "[data-media-src], [data-media-poster]"
     ));
     if (!media.length) return;
 
-    if (!("IntersectionObserver" in window)) {{
+    if (!("IntersectionObserver" in window)) {
       media.forEach(loadElement);
       return;
-    }}
+    }
 
     const observer = new IntersectionObserver(
-      (entries) => {{
-        entries.forEach((entry) => {{
+      (entries) => {
+        entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
           loadElement(entry.target);
           observer.unobserve(entry.target);
-        }});
-      }},
-      {{ rootMargin: "300px 0px", threshold: 0.01 }}
+        });
+      },
+      { rootMargin: "300px 0px", threshold: 0.01 }
     );
     media.forEach((element) => observer.observe(element));
-  }};
+  };
 
-  if (!("serviceWorker" in navigator)) {{
-    observeMedia();
-    return;
-  }}
-
-  navigator.serviceWorker
-    .register("{SITE_BASE}media-sw.js", {{ scope: "{SITE_BASE}" }})
-    .then(() => navigator.serviceWorker.ready)
-    .then(() => {{
-      if (navigator.serviceWorker.controller) {{
-        observeMedia();
-        return;
-      }}
-
-      navigator.serviceWorker.addEventListener(
-        "controllerchange",
-        observeMedia,
-        {{ once: true }}
-      );
-    }})
-    .catch(observeMedia);
-}})();
+  observeMedia();
+})();
 """
 
 
@@ -286,6 +394,11 @@ def build() -> None:
     image_zoom_version = hashlib.sha256(
         (ROOT / "image-zoom.js").read_bytes()
     ).hexdigest()[:12]
+    media_loader = media_loader_source()
+    media_loader_version = hashlib.sha256(
+        media_loader.encode("utf-8")
+    ).hexdigest()[:12]
+    bundled_media = referenced_bundled_media()
 
     for source in ROOT.rglob("*"):
         if not source.is_file() or is_excluded(source):
@@ -295,6 +408,10 @@ def build() -> None:
         destination = OUTPUT / relative
 
         if source.suffix.lower() in MEDIA_EXTENSIONS:
+            repository_path = repository_path_for(relative)
+            if repository_path in bundled_media:
+                destination = OUTPUT / repository_path
+                bundle_media(source, destination)
             continue
 
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -330,7 +447,10 @@ def build() -> None:
                 text,
             )
             loader_tag = (
-                f'<script src="{SITE_BASE}media-loader.js" defer></script>'
+                (
+                    f'<script src="{SITE_BASE}media-loader.js'
+                    f'?v={media_loader_version}" defer></script>'
+                )
             )
             gallery_autoplay_tag = (
                 (
@@ -376,7 +496,7 @@ def build() -> None:
         encoding="utf-8",
     )
     (OUTPUT / "media-loader.js").write_text(
-        media_loader_source(),
+        media_loader,
         encoding="utf-8",
     )
     (OUTPUT / "gallery-autoplay.js").write_text(
