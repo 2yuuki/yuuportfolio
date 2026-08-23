@@ -76,6 +76,7 @@
     image = visibleArtworkImage(image);
     const details = imageDetails(image);
     const expandedSource = (
+      image.dataset.fullSrc ||
       image.dataset.mediaSrc ||
       image.currentSrc ||
       image.src

@@ -6,6 +6,7 @@
 *.JPEG filter=lfs diff=lfs merge=lfs -text
 *.gif filter=lfs diff=lfs merge=lfs -text
 *.GIF filter=lfs diff=lfs merge=lfs -text
+*.webp filter=lfs diff=lfs merge=lfs -text
 *.mp4 filter=lfs diff=lfs merge=lfs -text
 *.MP4 filter=lfs diff=lfs merge=lfs -text
 *.mov filter=lfs diff=lfs merge=lfs -text

@@ -1,6 +1,7 @@
 from pathlib import Path
 from urllib.parse import quote, unquote
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -25,9 +26,13 @@ MEDIA_UPSTREAM_BASE = (
 )
 BUNDLED_VIDEO_MAX_BYTES = 50 * 1024 * 1024
 MEDIA_EXTENSIONS = {
-    ".png", ".jpg", ".jpeg", ".gif", ".mp4", ".mov", ".pdf", ".docx"
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4", ".mov", ".pdf", ".docx"
 }
-EXCLUDED_PARTS = {".git", ".github", ".openai", "_site", "scripts"}
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+EXCLUDED_PARTS = {
+    ".git", ".github", ".openai", "_site", "scripts", "tmp",
+    "_legacy_from_Yuu",
+}
 REFERENCE_PATTERN = re.compile(
     r"(?P<attr>\b(?:src|href|poster))=(?P<quote>[\"'])(?P<value>[^\"']+)(?P=quote)",
     re.IGNORECASE,
@@ -43,10 +48,24 @@ MEDIA_TYPES = {
     ".jpg": "image/jpeg",
     ".jpeg": "image/jpeg",
     ".gif": "image/gif",
+    ".webp": "image/webp",
     ".mp4": "video/mp4",
     ".mov": "video/quicktime",
     ".pdf": "application/pdf",
     ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
+
+
+def load_web_media_manifest() -> dict[str, dict]:
+    manifest_path = ROOT / "assets" / "web-media-manifest.json"
+    if not manifest_path.exists():
+        return {}
+    return json.loads(manifest_path.read_text(encoding="utf-8"))
+
+
+WEB_MEDIA_MANIFEST = load_web_media_manifest()
+WEB_MEDIA_PATHS = {
+    entry["path"] for entry in WEB_MEDIA_MANIFEST.values()
 }
 
 
@@ -123,6 +142,18 @@ def should_bundle_media(path: Path) -> bool:
     return media_file_size(path) <= BUNDLED_VIDEO_MAX_BYTES
 
 
+def web_media_entry(path: Path) -> Optional[dict]:
+    try:
+        source_path = repository_path_for(path.relative_to(ROOT))
+    except ValueError:
+        return None
+    return WEB_MEDIA_MANIFEST.get(source_path)
+
+
+def site_media_url(repository_path: str) -> str:
+    return SITE_BASE + quote(repository_path, safe="/()")
+
+
 def defer_external_iframe(match: re.Match) -> str:
     tag = match.group(0)
     source_match = re.search(
@@ -173,7 +204,12 @@ def referenced_bundled_media() -> set[str]:
                 continue
             path_value = value.split("#", 1)[0].split("?", 1)[0]
             resolved = resolve_local_reference(html_file, path_value)
-            if resolved.exists() and should_bundle_media(resolved):
+            if not resolved.exists():
+                continue
+            variant = web_media_entry(resolved)
+            if variant:
+                referenced.add(variant["path"])
+            elif should_bundle_media(resolved):
                 referenced.add(repository_path_for(resolved.relative_to(ROOT)))
     return referenced
 
@@ -222,18 +258,38 @@ def rewrite_match(html_file: Path, match: re.Match) -> str:
             html_file,
             original.split("#", 1)[0].split("?", 1)[0],
         )
-        placeholder = TRANSPARENT_IMAGE if resolved.suffix.lower() in {
-            ".png", ".jpg", ".jpeg", ".gif"
-        } else ""
+        variant = web_media_entry(resolved)
+        display_source = (
+            site_media_url(variant["path"])
+            if variant else rewritten
+        )
+        placeholder = (
+            TRANSPARENT_IMAGE
+            if resolved.suffix.lower() in IMAGE_EXTENSIONS else ""
+        )
+        full_source = (
+            f' data-full-src={quote_char}{rewritten}{quote_char}'
+            if variant and resolved.suffix.lower() in IMAGE_EXTENSIONS else ""
+        )
+        decoding = (
+            ' decoding="async"'
+            if resolved.suffix.lower() in IMAGE_EXTENSIONS else ""
+        )
         return (
             f'src={quote_char}{placeholder}{quote_char} '
-            f'data-media-src={quote_char}{rewritten}{quote_char}'
+            f'data-media-src={quote_char}{display_source}{quote_char}'
+            f'{full_source}{decoding}'
         )
 
     if attr == "poster":
+        variant = web_media_entry(resolve_local_reference(html_file, original))
+        display_source = (
+            site_media_url(variant["path"])
+            if variant else rewritten
+        )
         return (
             f'poster={quote_char}{TRANSPARENT_IMAGE}{quote_char} '
-            f'data-media-poster={quote_char}{rewritten}{quote_char}'
+            f'data-media-poster={quote_char}{display_source}{quote_char}'
         )
 
     return f'href={quote_char}{rewritten}{quote_char}'
@@ -346,6 +402,10 @@ self.addEventListener("fetch", (event) => {{
 
 def media_loader_source() -> str:
     return """(() => {
+  const isHiddenSlide = (element) => Boolean(
+    element.closest('[aria-hidden="true"]')
+  );
+
   const setFramePlayback = (frame, active) => {
     if (!frame.contentWindow) return;
     const source = frame.dataset.loadedEmbedSrc || "";
@@ -364,6 +424,7 @@ def media_loader_source() -> str:
   };
 
   const setPlayback = (element, active) => {
+    active = active && !isHiddenSlide(element);
     element.dataset.mediaVisible = active ? "true" : "false";
     if (element.tagName === "VIDEO") {
       if (active && element.dataset.autoplay === "true") {
@@ -381,7 +442,7 @@ def media_loader_source() -> str:
       element.src = element.dataset.mediaSrc;
       element.removeAttribute("data-media-src");
       if (element.tagName === "VIDEO") {
-        element.preload = "none";
+        element.preload = "metadata";
         element.load();
         if (element.dataset.mediaVisible === "true" && element.dataset.autoplay === "true") {
           element.play().catch(() => {});
@@ -431,7 +492,7 @@ def media_loader_source() -> str:
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
+          if (!entry.isIntersecting || isHiddenSlide(entry.target)) return;
           loadElement(entry.target);
           observer.unobserve(entry.target);
         });
@@ -444,9 +505,34 @@ def media_loader_source() -> str:
         playbackObserver.observe(element);
       }
     });
+
+    const loadSlide = (slide) => {
+      slide.querySelectorAll(
+        "[data-media-src], [data-media-poster], [data-embed-src]"
+      ).forEach(loadElement);
+    };
+
+    const slideObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        const slide = mutation.target;
+        if (slide.getAttribute("aria-hidden") !== "false") return;
+        loadSlide(slide);
+        const nextSlide = slide.nextElementSibling || slide.parentElement?.firstElementChild;
+        if (nextSlide) loadSlide(nextSlide);
+      });
+    });
+    document.querySelectorAll("[aria-hidden]").forEach((slide) => {
+      slideObserver.observe(slide, {
+        attributes: true,
+        attributeFilter: ["aria-hidden"],
+      });
+      if (slide.getAttribute("aria-hidden") === "false") {
+        loadSlide(slide);
+      }
+    });
   };
 
-  observeMedia();
+  window.requestAnimationFrame(observeMedia);
 })();
 """
 
@@ -483,8 +569,13 @@ def build() -> None:
         relative = source.relative_to(ROOT)
         destination = OUTPUT / relative
 
+        repository_path = repository_path_for(relative)
+        if repository_path in WEB_MEDIA_PATHS:
+            destination = OUTPUT / repository_path
+            bundle_media(source, destination)
+            continue
+
         if source.suffix.lower() in MEDIA_EXTENSIONS:
-            repository_path = repository_path_for(relative)
             if repository_path in bundled_media:
                 destination = OUTPUT / repository_path
                 bundle_media(source, destination)
