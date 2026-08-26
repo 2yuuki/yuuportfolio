@@ -983,5 +983,15 @@
     "path": "assets/web-media/97c38400cf4e1ffe.webp",
     "original_bytes": 39452409,
     "optimized_bytes": 3234248
+  },
+  "works/personal works/drawings/Artboard 1.png": {
+    "path": "assets/web-media/f7642d3952e3dd62.webp",
+    "original_bytes": 2453333,
+    "optimized_bytes": 139822
+  },
+  "works/personal works/drawings/Artboard 2.png": {
+    "path": "assets/web-media/98d7834efa9b279f.webp",
+    "original_bytes": 1667977,
+    "optimized_bytes": 137012
   }
 }
