@@ -148,9 +148,21 @@
     <div style="text-align: right">
       <span style="color: rgba(0, 0, 0, 0.4);"><digital-clock pad-hour="true" twentyfour-hour="true" value="{hour}:{minute}:{second}"></digital-clock></span>
     </div>
-  </column-unit></column-set>
+</column-unit></column-set>
 
-<br><br><br>
+<nav class="homepage-year-filter" aria-label="Filter projects by year">
+  <span class="homepage-year-filter__label">Year</span>
+  <button class="homepage-year-filter__button is-active" type="button" data-year-filter="all" aria-pressed="true">All</button>
+  <button class="homepage-year-filter__button" type="button" data-year-filter="2026" aria-pressed="false">2026</button>
+  <button class="homepage-year-filter__button" type="button" data-year-filter="2025" aria-pressed="false">2025</button>
+  <button class="homepage-year-filter__button" type="button" data-year-filter="2024" aria-pressed="false">2024</button>
+  <button class="homepage-year-filter__button" type="button" data-year-filter="2023" aria-pressed="false">2023</button>
+  <button class="homepage-year-filter__button" type="button" data-year-filter="2022" aria-pressed="false">2022</button>
+</nav>
+
+<p class="homepage-year-filter__status" aria-live="polite">Showing all projects.</p>
+
+<br><br>
 
 <column-set gutter="1rem"><column-unit slot="0" span="12" style="border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.5rem; margin-bottom: 2rem;">
     <b>I. Interactive &amp; Creative Technology</b>
@@ -353,11 +365,11 @@
     <b>III. Sketches</b>
   </column-unit></column-set>
 
-<column-set class="masonry-row" gutter="2rem" style="margin-bottom: 6rem; align-items: flex-start;"><column-unit slot="0" span="5">
+<column-set class="masonry-row" gutter="2rem" style="margin-bottom: 6rem; align-items: flex-start;"><column-unit slot="0" span="5" data-project-year="2026">
     <div class="project-card-static">
       <media-item class="zoomable"><img class="local-project-media" src="./works/personal%20works/drawings/Artboard%201.png" alt="Sketches — Artboard 1" loading="lazy"></media-item>
     </div>
-  </column-unit><column-unit slot="1" span="1"></column-unit><column-unit slot="2" span="5" style="margin-top: 5rem;">
+  </column-unit><column-unit slot="1" span="1"></column-unit><column-unit slot="2" span="5" style="margin-top: 5rem;" data-project-year="2026">
     <div class="project-card-static">
       <media-item class="zoomable"><img class="local-project-media" src="./works/personal%20works/drawings/Artboard%202.png" alt="Sketches — Artboard 2" loading="lazy"></media-item>
     </div>
@@ -711,5 +723,6 @@
   <script src="./mobile-info-overlay.js" defer></script>
   <script src="./lazy-media.js" defer></script>
   <script src="./gallery-autoplay.js" defer></script>
+  <script src="./homepage-year-filter.js" defer></script>
 </body>
 </html>
