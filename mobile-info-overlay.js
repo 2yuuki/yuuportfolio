@@ -1,4 +1,13 @@
 (() => {
+  const ownScript = document.currentScript?.src;
+  if (ownScript && !document.querySelector('script[data-yuu-language-loader]')) {
+    const languageScript = document.createElement('script');
+    languageScript.src = new URL('language-toggle.js', ownScript).href;
+    languageScript.defer = true;
+    languageScript.dataset.yuuLanguageLoader = '';
+    document.head.append(languageScript);
+  }
+
   const MOBILE_QUERY = "(max-width: 768px)";
   let activeOverlay = null;
   let opener = null;
