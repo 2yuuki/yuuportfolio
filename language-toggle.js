@@ -9,6 +9,7 @@
 
   const exact = {
     'Selected Works': 'Dự án tiêu biểu',
+    'Featured Works': 'Dự án nổi bật',
     'An index of commercial production, visual systems, and creative technology.': 'Tuyển tập các dự án sản xuất thương mại, hệ thống thị giác và công nghệ sáng tạo.',
     'Year': 'Năm',
     'All': 'Tất cả',
@@ -146,7 +147,11 @@
     'Back to top': 'Về đầu trang',
     'Portfolio information and work index': 'Thông tin portfolio và mục lục dự án',
     'Previous image': 'Ảnh trước',
-    'Next image': 'Ảnh tiếp theo'
+    'Next image': 'Ảnh tiếp theo',
+    'Featured work highlights': 'Tổng hợp dự án nổi bật',
+    'Featured gallery controls': 'Điều khiển gallery dự án nổi bật',
+    'Previous project': 'Dự án trước',
+    'Next project': 'Dự án tiếp theo'
   };
 
   const translateValue = (value) => {
