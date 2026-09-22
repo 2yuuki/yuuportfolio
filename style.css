@@ -2585,7 +2585,8 @@ text-icon[icon="upwards-arrow"]::after {
 }
 
 .portfolio-index .vimeo-project-thumbnail,
-.portfolio-index .youtube-project-thumbnail {
+.portfolio-index .youtube-project-thumbnail,
+.portfolio-index .instagram-project-thumbnail {
   position: relative;
   display: block;
   width: 100%;
@@ -2593,6 +2594,17 @@ text-icon[icon="upwards-arrow"]::after {
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: #000 !important;
+}
+
+.portfolio-index .instagram-project-thumbnail {
+  aspect-ratio: 9 / 16;
+}
+
+.portfolio-index .instagram-project-thumbnail iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .portfolio-index .vimeo-project-thumbnail iframe,

@@ -7,6 +7,23 @@
   const originalText = new WeakMap();
   const originalAttributes = new WeakMap();
 
+  const syncChuDuNavigation = () => {
+    const titles = document.querySelectorAll(
+      '.portfolio-sidebar__role-title, .mobile-commercial-role__title'
+    );
+    titles.forEach((title) => {
+      if (!title.textContent.includes('7.4 /')) return;
+      const group = title.closest('.portfolio-sidebar__role-group, .mobile-commercial-role');
+      const list = group?.querySelector('.portfolio-sidebar__items, .work-items');
+      if (!list || list.querySelector('[data-chu-du-nav]')) return;
+
+      const item = document.createElement('li');
+      item.dataset.chuDuNav = '';
+      item.innerHTML = '<a href="https://www.instagram.com/reel/DdOpnXDpOk4/" target="_blank" rel="noopener">Chu Du ↗</a>';
+      list.append(item);
+    });
+  };
+
   const exact = {
     'Selected Works': 'Dự án tiêu biểu',
     'Featured Works': 'Dự án nổi bật',
@@ -250,6 +267,7 @@
   });
 
   document.body.append(switcher);
+  syncChuDuNavigation();
   applyLanguage(currentLanguage, false);
 
   const observer = new MutationObserver((mutations) => {
@@ -263,6 +281,7 @@
           node.nodeValue = translateValue(originalText.get(node));
         }
       });
+      syncChuDuNavigation();
     });
   });
 
