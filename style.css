@@ -35,8 +35,11 @@
 }
 
 .featured-showcase {
+  position: relative;
+  z-index: 40;
   width: 100%;
   margin: 3rem 0 4rem;
+  background: #fff;
 }
 
 .featured-showcase__heading,
@@ -119,6 +122,25 @@
   bottom: auto;
   height: auto;
   aspect-ratio: 16 / 9;
+}
+
+@media (min-width: 769px) {
+  /*
+    The homepage collection starts at 34vw and has 4.75vw left padding.
+    Pull the opening gallery back across both that area and the fixed index,
+    then let the media use the complete viewport width.
+  */
+  .portfolio-index > .featured-showcase {
+    width: 100vw;
+    max-width: none;
+    margin: -1.5rem 0 4rem calc(-34vw - 4.75vw);
+  }
+
+  .portfolio-index > .featured-showcase .featured-showcase__heading,
+  .portfolio-index > .featured-showcase .featured-showcase__caption {
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+  }
 }
 
 .homepage-year-filter__label {
@@ -217,7 +239,15 @@
   }
 
   .featured-showcase {
-    margin: 2.5rem 0 3rem;
+    width: 100vw;
+    max-width: none;
+    margin: 0 0 3rem -1.25rem;
+  }
+
+  .featured-showcase__heading,
+  .featured-showcase__caption {
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
 
   .featured-showcase__caption > a,

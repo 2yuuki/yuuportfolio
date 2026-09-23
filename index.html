@@ -765,6 +765,9 @@
     const root = document.querySelector('.portfolio-index');
     if (!root) return;
 
+    const featuredShowcase = root.querySelector('.featured-showcase');
+    if (featuredShowcase) root.prepend(featuredShowcase);
+
     root.querySelectorAll('[data-horizontal-gallery]').forEach((gallery) => {
       const viewport = gallery.querySelector('.homepage-horizontal-gallery__viewport');
       const previous = gallery.querySelector('[data-gallery-prev]');
@@ -772,8 +775,15 @@
       if (!viewport || !previous || !next) return;
 
       const move = (direction) => {
-        viewport.scrollBy({
-          left: direction * viewport.clientWidth,
+        const slides = Array.from(gallery.querySelectorAll('.homepage-horizontal-gallery__slide'));
+        const currentIndex = viewport.clientWidth
+          ? Math.round(viewport.scrollLeft / viewport.clientWidth)
+          : 0;
+        const targetIndex = slides.length
+          ? (currentIndex + direction + slides.length) % slides.length
+          : 0;
+        viewport.scrollTo({
+          left: targetIndex * viewport.clientWidth,
           behavior: 'smooth'
         });
       };
