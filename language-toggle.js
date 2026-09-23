@@ -153,6 +153,7 @@
     [/\bGraphic Designer\b/g, 'Thiết kế đồ họa'],
     [/\bPost Producer\b/g, 'Sản xuất hậu kỳ'],
     [/\bDirector's Assistant\b/g, 'Trợ lý đạo diễn'],
+    [/\bDirector's Creative Team\b/g, 'Đội ngũ sáng tạo của đạo diễn'],
     [/\bCreative for Film Treatment\b/g, 'Sáng tạo film treatment'],
     [/\bCreative\b/g, 'Sáng tạo'],
     [/\bShowing projects from (20\d{2})\./g, 'Đang hiển thị dự án năm $1.']
