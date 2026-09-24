@@ -779,7 +779,18 @@
     if (!root) return;
 
     const featuredShowcase = root.querySelector('.featured-showcase');
-    if (featuredShowcase) root.prepend(featuredShowcase);
+    if (featuredShowcase) {
+      root.prepend(featuredShowcase);
+      featuredShowcase.querySelectorAll('.featured-showcase__media').forEach((media) => {
+        if (media.querySelector('.featured-showcase__brand')) return;
+        const brand = document.createElement('a');
+        brand.className = 'featured-showcase__brand';
+        brand.href = './index.html';
+        brand.setAttribute('aria-label', 'Return to homepage');
+        brand.textContent = '¥uuwØuldńéver';
+        media.append(brand);
+      });
+    }
 
     root.querySelectorAll('[data-horizontal-gallery]').forEach((gallery) => {
       const viewport = gallery.querySelector('.homepage-horizontal-gallery__viewport');

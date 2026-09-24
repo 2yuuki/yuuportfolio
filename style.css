@@ -76,6 +76,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
+  isolation: isolate;
   place-items: center;
   background: #000;
 }
@@ -88,6 +89,34 @@
   height: 100%;
   border: 0;
   object-fit: contain;
+}
+
+.portfolio-index .featured-showcase__slide .featured-showcase__media--image img {
+  width: auto;
+  max-width: none;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.featured-showcase__brand {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  left: 50%;
+  color: #fff;
+  font-family: "Cirrus Cumulus", serif;
+  font-size: clamp(2rem, 6vw, 6rem);
+  line-height: 0.85;
+  text-decoration: none;
+  white-space: nowrap;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+}
+
+.featured-showcase__brand:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 0.25rem;
 }
 
 .featured-showcase__media .embedded-project-media {
