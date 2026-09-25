@@ -144,10 +144,22 @@
     'A compact commercial introducing the Coca-Cola 250ml format.': 'Một TVC ngắn gọn giới thiệu phiên bản Coca-Cola 250ml.',
     'A cinematic esports trailer built for the APL 2026 stage.': 'Một trailer esports mang màu sắc điện ảnh cho sân khấu APL 2026.',
     'A graphic-led music video world created for Hau Hoang.': 'Một thế giới music video được xây dựng bằng ngôn ngữ graphic cho Hậu Hoàng.',
-    'A travel commercial delivered through a fast post-production pipeline.': 'Một TVC du lịch được hoàn thiện qua quy trình hậu kỳ nhanh và chặt chẽ.'
+    'A travel commercial delivered through a fast post-production pipeline.': 'Một TVC du lịch được hoàn thiện qua quy trình hậu kỳ nhanh và chặt chẽ.',
+    'Concept, Visual System, UI/UX & p5.js Development': 'Ý tưởng, hệ thống thị giác, UI/UX & lập trình p5.js',
+    'Director, Concept Artist & 3D Designer': 'Đạo diễn, concept artist & thiết kế 3D',
+    'Art Director, Producer & 3D Modeller': 'Giám đốc nghệ thuật, producer & dựng hình 3D',
+    'Game Designer, Art Director & 3D Artist': 'Thiết kế game, giám đốc nghệ thuật & nghệ sĩ 3D',
+    'Concept, Character Design, Styling & 3D Art': 'Ý tưởng, thiết kế nhân vật, styling & 3D art',
+    'Type Designer & Lettering Artist': 'Thiết kế chữ & lettering'
   };
 
   const fragments = [
+    [/Concept, Visual System, UI\/UX & p5\.js Development/g, 'Ý tưởng, hệ thống thị giác, UI/UX & lập trình p5.js'],
+    [/Director, Concept Artist & 3D Designer/g, 'Đạo diễn, concept artist & thiết kế 3D'],
+    [/Art Director, Producer & 3D Modeller/g, 'Giám đốc nghệ thuật, producer & dựng hình 3D'],
+    [/Game Designer, Art Director & 3D Artist/g, 'Thiết kế game, giám đốc nghệ thuật & nghệ sĩ 3D'],
+    [/Concept, Character Design, Styling & 3D Art/g, 'Ý tưởng, thiết kế nhân vật, styling & 3D art'],
+    [/Type Designer & Lettering Artist/g, 'Thiết kế chữ & lettering'],
     [/\bCode & Print\b/g, 'Lập trình & In ấn'],
     [/\bUnreal Engine Game\b/g, 'Trò chơi trên Unreal Engine'],
     [/\bUnity Game\b/g, 'Trò chơi trên Unity'],
