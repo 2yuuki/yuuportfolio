@@ -1,4 +1,17 @@
 (() => {
+  const workPage = document.querySelector('main.cargo-work-template');
+  const intro = workPage?.querySelector(':scope > column-set:first-of-type');
+  const processBook = workPage?.querySelector(':scope > .process-book-section');
+  if (intro && processBook) {
+    const sections = Array.from(workPage.querySelectorAll(':scope > column-set'));
+    const findSection = (pattern) => sections.find((section) => pattern.test(section.textContent));
+    const anchor = findSection(/How It Works/i)
+      || findSection(/Overview/i)
+      || findSection(/The Insight|Narrative|Execution & Role/i)
+      || intro;
+    anchor.after(processBook);
+  }
+
   const ownScript = document.currentScript?.src;
   if (ownScript && !document.querySelector('script[data-yuu-language-loader]')) {
     const languageScript = document.createElement('script');
@@ -6,6 +19,18 @@
     languageScript.defer = true;
     languageScript.dataset.yuuLanguageLoader = '';
     document.head.append(languageScript);
+  }
+
+  if (
+    ownScript &&
+    document.querySelector('.process-book-frame iframe[src*=".pdf"]') &&
+    !document.querySelector('script[data-yuu-process-book-loader]')
+  ) {
+    const processBookScript = document.createElement('script');
+    processBookScript.src = new URL('process-book-viewer.js', ownScript).href;
+    processBookScript.defer = true;
+    processBookScript.dataset.yuuProcessBookLoader = '';
+    document.head.append(processBookScript);
   }
 
   const MOBILE_QUERY = "(max-width: 768px)";

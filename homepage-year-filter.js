@@ -37,6 +37,16 @@
     });
   };
 
+  const updateStatus = (selectedYear) => {
+    if (!status) return;
+    const isVietnamese = document.documentElement.lang === 'vi';
+    status.textContent = selectedYear === 'all'
+      ? (isVietnamese ? 'Đang hiển thị toàn bộ dự án.' : 'Showing all projects.')
+      : (isVietnamese
+        ? `Đang hiển thị dự án năm ${selectedYear}.`
+        : `Showing projects from ${selectedYear}.`);
+  };
+
   const applyFilter = (selectedYear) => {
     projects.forEach(({ unit, year }) => {
       unit.hidden = selectedYear !== 'all' && year !== selectedYear;
@@ -55,11 +65,7 @@
       button.setAttribute('aria-pressed', String(isActive));
     });
 
-    if (status) {
-      status.textContent = selectedYear === 'all'
-        ? 'Showing all projects.'
-        : `Showing projects from ${selectedYear}.`;
-    }
+    updateStatus(selectedYear);
   };
 
   buttons.forEach((button) => {
@@ -67,4 +73,8 @@
   });
 
   applyFilter('all');
+  window.addEventListener('yuu:languagechange', () => {
+    const selectedYear = buttons.find((button) => button.classList.contains('is-active'))?.dataset.yearFilter || 'all';
+    updateStatus(selectedYear);
+  });
 })();

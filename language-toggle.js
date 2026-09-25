@@ -3,6 +3,7 @@
   window.__yuuLanguageToggleLoaded = true;
 
   const STORAGE_KEY = 'yuu-portfolio-language';
+  const THEME_STORAGE_KEY = 'yuu-portfolio-theme';
   const supportedLanguages = new Set(['en', 'vi']);
   const originalText = new WeakMap();
   const originalAttributes = new WeakMap();
@@ -196,7 +197,8 @@
     'Featured work highlights': 'Tổng hợp dự án nổi bật',
     'Featured gallery controls': 'Điều khiển gallery dự án nổi bật',
     'Previous project': 'Dự án trước',
-    'Next project': 'Dự án tiếp theo'
+    'Next project': 'Dự án tiếp theo',
+    'Language': 'Ngôn ngữ'
   };
 
   const translateValue = (value) => {
@@ -253,6 +255,8 @@
   switcher.className = 'language-switcher';
   switcher.setAttribute('aria-label', 'Language');
   switcher.innerHTML = `
+    <button class="theme-switcher__button" type="button" aria-label="Toggle dark mode" title="Toggle dark mode" aria-pressed="false">◐</button>
+    <span aria-hidden="true">/</span>
     <button class="language-switcher__button" type="button" data-language="en" aria-pressed="false">EN</button>
     <span aria-hidden="true">/</span>
     <button class="language-switcher__button" type="button" data-language="vi" aria-pressed="false">VI</button>
@@ -268,6 +272,26 @@
   };
 
   let currentLanguage = getSavedLanguage();
+
+  const getSavedTheme = () => {
+    try {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch {}
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+
+  const themeButton = switcher.querySelector('.theme-switcher__button');
+  const applyTheme = (theme, persist = true) => {
+    const currentTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = currentTheme;
+    themeButton.setAttribute('aria-pressed', String(currentTheme === 'dark'));
+    themeButton.setAttribute('aria-label', currentTheme === 'dark' ? 'Toggle light mode' : 'Toggle dark mode');
+    themeButton.setAttribute('title', currentTheme === 'dark' ? 'Toggle light mode' : 'Toggle dark mode');
+    if (persist) {
+      try { localStorage.setItem(THEME_STORAGE_KEY, currentTheme); } catch {}
+    }
+  };
 
   const applyLanguage = (language, persist = true) => {
     currentLanguage = supportedLanguages.has(language) ? language : 'en';
@@ -290,12 +314,17 @@
   };
 
   switcher.addEventListener('click', (event) => {
+    if (event.target.closest('.theme-switcher__button')) {
+      applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+      return;
+    }
     const button = event.target.closest('[data-language]');
     if (button) applyLanguage(button.dataset.language);
   });
 
   document.body.append(switcher);
   syncChuDuNavigation();
+  applyTheme(getSavedTheme(), false);
   applyLanguage(currentLanguage, false);
 
   const observer = new MutationObserver((mutations) => {
