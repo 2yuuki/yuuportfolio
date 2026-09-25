@@ -791,6 +791,49 @@
     const featuredShowcase = root.querySelector('.featured-showcase');
     if (featuredShowcase) {
       root.prepend(featuredShowcase);
+
+      const track = featuredShowcase.querySelector('.homepage-horizontal-gallery__track');
+      const slides = track
+        ? Array.from(track.querySelectorAll(':scope > .featured-showcase__slide'))
+        : [];
+
+      if (track && slides.length > 1) {
+        const slideId = (slide) => slide
+          .querySelector('.featured-showcase__caption span')
+          ?.textContent.trim() || '';
+        const signature = (items) => items.map(slideId).join('|');
+        const originalSignature = signature(slides);
+
+        for (let index = slides.length - 1; index > 0; index -= 1) {
+          const randomIndex = Math.floor(Math.random() * (index + 1));
+          [slides[index], slides[randomIndex]] = [slides[randomIndex], slides[index]];
+        }
+
+        let previousSignature = '';
+        try {
+          previousSignature = window.sessionStorage.getItem('yuu-featured-order') || '';
+        } catch (_error) {
+          previousSignature = '';
+        }
+
+        let nextSignature = signature(slides);
+        let attempts = 0;
+        while (
+          (nextSignature === originalSignature || nextSignature === previousSignature) &&
+          attempts < slides.length
+        ) {
+          slides.push(slides.shift());
+          nextSignature = signature(slides);
+          attempts += 1;
+        }
+
+        slides.forEach((slide) => track.append(slide));
+        try {
+          window.sessionStorage.setItem('yuu-featured-order', nextSignature);
+        } catch (_error) {
+          // The gallery still shuffles when browser storage is unavailable.
+        }
+      }
     }
 
     root.querySelectorAll('[data-horizontal-gallery]').forEach((gallery) => {
