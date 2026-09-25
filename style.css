@@ -53,13 +53,22 @@
 }
 
 .featured-showcase__heading {
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem;
+  position: absolute;
+  z-index: 7;
+  top: 1.5rem;
+  right: 1.5rem;
+  left: 1.5rem;
+  width: auto;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  color: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
 }
 
 .featured-showcase__counter {
-  color: rgba(0, 0, 0, 0.4);
+  color: inherit;
 }
 
 .featured-showcase__gallery {
@@ -74,7 +83,8 @@
   position: relative;
   display: grid;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: 100svh;
+  aspect-ratio: auto;
   overflow: hidden;
   isolation: isolate;
   place-items: center;
@@ -111,7 +121,66 @@
   text-decoration: none;
   white-space: nowrap;
   mix-blend-mode: difference;
+  pointer-events: auto;
   transform: translate(-50%, -50%);
+}
+
+.featured-showcase__overlay {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100svh;
+  aspect-ratio: auto;
+  color: #fff;
+  pointer-events: none;
+}
+
+.featured-showcase__project-meta,
+.featured-showcase__project-year {
+  position: absolute;
+  bottom: 1.5rem;
+  color: #fff;
+  font-family: "ABC Social Condensed Light", sans-serif;
+  font-size: clamp(0.85rem, 1.25vw, 1.2rem);
+  line-height: 1.15;
+  mix-blend-mode: difference;
+}
+
+.featured-showcase__project-meta {
+  left: 1.5rem;
+  display: flex;
+  max-width: min(38rem, 62vw);
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.featured-showcase__project-title {
+  font-family: "ABC Social Condensed Light", sans-serif;
+}
+
+.featured-showcase__project-role,
+.featured-showcase__project-description {
+  display: block;
+}
+
+.featured-showcase__project-year {
+  right: 1.5rem;
+  text-align: right;
+}
+
+.featured-showcase__caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .featured-showcase__brand:focus-visible {
@@ -149,8 +218,8 @@
 .portfolio-index .featured-showcase__controls {
   top: 0;
   bottom: auto;
-  height: auto;
-  aspect-ratio: 16 / 9;
+  height: 100svh;
+  aspect-ratio: auto;
 }
 
 @media (min-width: 769px) {
@@ -277,6 +346,28 @@
   .featured-showcase__caption {
     padding-right: 1rem;
     padding-left: 1rem;
+  }
+
+  .featured-showcase__heading {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    padding: 0;
+  }
+
+  .featured-showcase__project-meta,
+  .featured-showcase__project-year {
+    bottom: 0.75rem;
+    font-size: 0.72rem;
+  }
+
+  .featured-showcase__project-meta {
+    left: 0.75rem;
+    max-width: 72vw;
+  }
+
+  .featured-showcase__project-year {
+    right: 0.75rem;
   }
 
   .featured-showcase__caption > a,
