@@ -1,4 +1,14 @@
 (() => {
+  document.querySelectorAll('a[href$="contact-form"], a[href$="/contact-form"]').forEach((link) => {
+    link.href = 'mailto:yuuki24.work@gmail.com';
+    link.removeAttribute('rel');
+  });
+
+  document.documentElement.classList.toggle(
+    'feature-home-page',
+    Boolean(document.querySelector('.featured-showcase'))
+  );
+
   const workPage = document.querySelector('main.cargo-work-template');
   const intro = workPage?.querySelector(':scope > column-set:first-of-type');
   const processBook = workPage?.querySelector(':scope > .process-book-section');
@@ -7,9 +17,8 @@
     const findSection = (pattern) => sections.find((section) => pattern.test(section.textContent));
     const anchor = findSection(/How It Works/i)
       || findSection(/Overview/i)
-      || findSection(/The Insight|Narrative|Execution & Role/i)
-      || intro;
-    anchor.after(processBook);
+      || findSection(/The Insight|Narrative|Execution & Role/i);
+    if (anchor) anchor.after(processBook);
   }
 
   const ownScript = document.currentScript?.src;

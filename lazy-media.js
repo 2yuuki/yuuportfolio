@@ -1,4 +1,18 @@
 (() => {
+  const lazyFrames = Array.from(document.querySelectorAll('iframe[loading="lazy"]'))
+    .filter((frame) => !frame.closest('.process-book-frame'));
+
+  if (lazyFrames.length && 'IntersectionObserver' in window) {
+    const frameObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.loading = 'eager';
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px', threshold: 0.01 });
+    lazyFrames.forEach((frame) => frameObserver.observe(frame));
+  }
+
   const facebookFrames = Array.from(
     document.querySelectorAll('iframe[data-facebook-autoplay="true"]')
   );
@@ -23,7 +37,7 @@
             facebookObserver.unobserve(entry.target);
           });
         },
-        { rootMargin: "300px 0px", threshold: 0.01 }
+        { rootMargin: "0px", threshold: 0.01 }
       );
       facebookFrames.forEach((frame) => facebookObserver.observe(frame));
     }
@@ -34,6 +48,17 @@
 
   videos.forEach((video) => {
     video.preload = "none";
+
+    const startTime = Number(video.dataset.startTime);
+    const seekToStart = () => {
+      if (Number.isFinite(startTime)) video.currentTime = startTime;
+    };
+
+    if (Number.isFinite(startTime)) {
+      if (video.readyState >= 1) seekToStart();
+      else video.addEventListener("loadedmetadata", seekToStart, { once: true });
+      video.addEventListener("play", seekToStart);
+    }
 
     const updateOrientation = () => {
       if (!video.videoWidth || !video.videoHeight) return;
@@ -80,7 +105,7 @@
         updateVideo(entry.target, entry.isIntersecting);
       });
     },
-    { rootMargin: "300px 0px", threshold: 0.01 }
+    { rootMargin: "0px", threshold: 0.01 }
   );
 
   videos.forEach((video) => observer.observe(video));

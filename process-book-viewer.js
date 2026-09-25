@@ -279,7 +279,7 @@
         currentObserver.unobserve(entry.target);
         enhanceFrame(entry.target);
       });
-    }, { rootMargin: '500px 0px' });
+    }, { rootMargin: '0px', threshold: 0.01 });
     frames.forEach((frame) => observer.observe(frame));
   } else {
     frames.forEach(enhanceFrame);
